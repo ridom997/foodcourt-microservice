@@ -1,6 +1,5 @@
 package com.pragma.powerup.foodcourtmicroservice.configuration.security;
 
-import com.pragma.powerup.foodcourtmicroservice.adapters.driven.jpa.mysql.adapter.UserDetailsServiceImpl;
 import com.pragma.powerup.foodcourtmicroservice.configuration.security.jwt.JwtEntryPoint;
 import com.pragma.powerup.foodcourtmicroservice.configuration.security.jwt.JwtTokenFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,17 +10,12 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class MainSecurity {
-
-    @Autowired
-    UserDetailsServiceImpl userDetailsService;
 
     @Autowired
     JwtEntryPoint jwtEntryPoint;
@@ -32,22 +26,17 @@ public class MainSecurity {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
     public AuthenticationManager authenticationManager(
+            //To delete generated password.
             AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.cors().and().csrf().disable()
                 .authorizeRequests(requests -> requests
-                        .requestMatchers("/auth/login", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/actuator/health", "/user/").permitAll()
-                        //.requestMatchers("/user").hasRole("ADMIN")
+                        .requestMatchers( "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/actuator/health").permitAll()
+                        .requestMatchers("/hello").hasRole("OWNER")
                         .anyRequest().authenticated()
                 )
                 .formLogin().disable()

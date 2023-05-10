@@ -34,9 +34,9 @@ public class MainSecurity {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.cors().and().csrf().disable()
-                .authorizeRequests(requests -> requests
+                .authorizeHttpRequests(requests -> requests
                         .requestMatchers( "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/actuator/health").permitAll()
-                        .requestMatchers("/hello").hasRole("OWNER")
+                        .requestMatchers("/restaurants").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin().disable()

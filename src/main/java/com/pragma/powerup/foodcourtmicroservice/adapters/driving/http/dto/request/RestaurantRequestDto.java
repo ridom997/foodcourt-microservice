@@ -4,9 +4,13 @@ import com.pragma.powerup.foodcourtmicroservice.configuration.Constants;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
+@Setter
 public class RestaurantRequestDto {
     @NotBlank
     @Size(max = 100)

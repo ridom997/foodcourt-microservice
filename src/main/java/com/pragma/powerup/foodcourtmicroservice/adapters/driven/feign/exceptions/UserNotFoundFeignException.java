@@ -4,4 +4,8 @@ public class UserNotFoundFeignException extends RuntimeException {
     public UserNotFoundFeignException(Throwable cause) {
         super(cause);
     }
+
+    public UserNotFoundFeignException() {
+        super();
+    }
 }

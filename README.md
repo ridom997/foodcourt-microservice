@@ -51,7 +51,7 @@ To get a local copy up and running follow these steps.
 
 1. Right-click the class FoodCourtMicroserviceApplication and choose Run
 3. Start the user-microservice ["user-microservice"](https://github.com/ridom997/user-microservice)
-4.  Open [http://localhost:8091/swagger-ui/index.html](http://localhost:8090/swagger-ui/index.html) in your web browser
+4.  Open [http://localhost:8091/swagger-ui/index.html](http://localhost:8091/swagger-ui/index.html) in your web browser
 5. Use the endpoints
 
 

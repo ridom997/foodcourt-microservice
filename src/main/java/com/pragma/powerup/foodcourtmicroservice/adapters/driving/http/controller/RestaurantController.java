@@ -20,7 +20,7 @@ import java.util.Map;
 @RestController()
 @RequestMapping("/restaurants")
 @RequiredArgsConstructor
-@SecurityRequirement(name = "jwt")
+/*@SecurityRequirement(name = "jwt")*/
 public class RestaurantController {
 
     private final IRestaurantHandler restaurantHandler;

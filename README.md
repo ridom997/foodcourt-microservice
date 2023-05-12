@@ -32,11 +32,7 @@ To get a local copy up and running follow these steps.
 ### Installation
 
 1. Clone the repository
-2. Change directory
-   ```sh
-   cd power-up-arquetipo-v3
-   ```
-3. Create a new database in MySQL called powerup
+3. Create a new database in MySQL called powerup using the steps in the README of the repository ["user-microservice"](https://github.com/ridom997/user-microservice). For simplicity both microservices will use only one database.
 4. Update the database connection settings
    ```yml
    # src/main/resources/application-dev.yml
@@ -46,14 +42,18 @@ To get a local copy up and running follow these steps.
           username: root
           password: <your-password>
    ```
-5. After the tables are created execute src/main/resources/data.sql content to populate the database
-6. Open Swagger UI and search the /auth/login endpoint and login with userDni: 123, password: 1234
+5. Run this project to create the tables of this microservices in db (Right-click the class FoodCourtMicroserviceApplication and choose Run)
+6. After the tables are created execute src/main/resources/data.sql content to populate the database with an owner user.
+
 
 <!-- USAGE -->
 ## Usage
 
-1. Right-click the class PowerUpApplication and choose Run
-2. Open [http://localhost:8090/swagger-ui/index.html](http://localhost:8090/swagger-ui/index.html) in your web browser
+1. Right-click the class FoodCourtMicroserviceApplication and choose Run
+3. Start the user-microservice ["user-microservice"](https://github.com/ridom997/user-microservice)
+4.  Open [http://localhost:8091/swagger-ui/index.html](http://localhost:8090/swagger-ui/index.html) in your web browser
+5. Use the endpoints
+
 
 <!-- ROADMAP -->
 ## Tests

@@ -13,25 +13,25 @@ import lombok.Setter;
 @Setter
 public class RestaurantRequestDto {
     @NotBlank
-    @Size(max = 100)
+    @Size(max = 100, min = 1)
     @Pattern(regexp = Constants.ALPHANUMERIC_BUT_NOT_ONLY_NUMBERS_REGEX, message = "Name is not valid, it must have at least one non-numeric character")
     private String name;
 
     @NotBlank
-    @Size(max = 100)
+    @Size(max = 100, min = 1)
     private String address;
 
     @NotBlank
-    @Size(max = 13)
+    @Size(max = 13, min = 1)
     @Pattern(regexp = Constants.PHONE_REGEX, message = "Phone is in bad format")
     private String phone;
 
     @NotBlank
-    @Size(max = 100)
+    @Size(max = 100, min = 1)
     private String urlLogo;
 
     @NotBlank
-    @Size(max = 100)
+    @Size(max = 100, min = 1)
     @Pattern(regexp = Constants.ONLY_NUMBERS_REGEX, message = "Nit must have only numbers")
     private String nit;
 

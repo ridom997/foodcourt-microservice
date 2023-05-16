@@ -4,14 +4,14 @@ import com.pragma.powerup.foodcourtmicroservice.configuration.Constants;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IRestaurantServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.*;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Restaurant;
-import com.pragma.powerup.foodcourtmicroservice.domain.spi.IRestaurantPersistancePort;
+import com.pragma.powerup.foodcourtmicroservice.domain.spi.IRestaurantPersistencePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.IUserValidationComunicationPort;
 
 public class RestaurantUseCase implements IRestaurantServicePort {
-    private final IRestaurantPersistancePort restaurantPersistancePort;
+    private final IRestaurantPersistencePort restaurantPersistancePort;
     private final IUserValidationComunicationPort userValidationComunicationPort;
 
-    public RestaurantUseCase(IRestaurantPersistancePort restaurantPersistancePort, IUserValidationComunicationPort userValidationComunicationPort) {
+    public RestaurantUseCase(IRestaurantPersistencePort restaurantPersistancePort, IUserValidationComunicationPort userValidationComunicationPort) {
         this.restaurantPersistancePort = restaurantPersistancePort;
         this.userValidationComunicationPort = userValidationComunicationPort;
     }
@@ -32,6 +32,16 @@ public class RestaurantUseCase implements IRestaurantServicePort {
         } catch (NullPointerException e){
             throw new RequiredVariableNotPresentException();
         }
+    }
+
+    @Override
+    public Restaurant findById(Long id) {
+        return restaurantPersistancePort.findById(id);
+    }
+
+    @Override
+    public Boolean isTheRestaurantOwner(Long idUser, Restaurant restaurant) {
+        return restaurant.getIdOwner().equals(idUser);
     }
 
 

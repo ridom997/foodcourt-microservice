@@ -1,4 +1,4 @@
 package com.pragma.powerup.foodcourtmicroservice.domain.spi;
 
-public interface IDishPersistancePort {
+public interface IOrderPersistencePort {
 }

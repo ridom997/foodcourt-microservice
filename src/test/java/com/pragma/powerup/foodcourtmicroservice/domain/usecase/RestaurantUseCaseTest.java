@@ -3,7 +3,7 @@ package com.pragma.powerup.foodcourtmicroservice.domain.usecase;
 import com.pragma.powerup.foodcourtmicroservice.configuration.Constants;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.*;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Restaurant;
-import com.pragma.powerup.foodcourtmicroservice.domain.spi.IRestaurantPersistancePort;
+import com.pragma.powerup.foodcourtmicroservice.domain.spi.IRestaurantPersistencePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.IUserValidationComunicationPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,7 @@ import static org.mockito.Mockito.when;
 class RestaurantUseCaseTest {
 
     @Mock
-    private IRestaurantPersistancePort mockRestaurantPersistancePort;
+    private IRestaurantPersistencePort mockRestaurantPersistancePort;
     @Mock
     private IUserValidationComunicationPort mockUserValidationComunicationPort;
 

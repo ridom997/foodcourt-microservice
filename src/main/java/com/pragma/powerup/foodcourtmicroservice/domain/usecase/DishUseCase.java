@@ -4,8 +4,10 @@ import com.pragma.powerup.foodcourtmicroservice.domain.api.ICategoryServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IDishServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IRestaurantServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.DishAndRestaurantOwnerIdDto;
-import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.NoDataFoundException;
+import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.NoCategoryFoundException;
+import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.NoRestaurantFoundException;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.UserHasNoPermissionException;
+import com.pragma.powerup.foodcourtmicroservice.domain.model.Category;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Restaurant;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.IDishPersistencePort;
 
@@ -26,14 +28,17 @@ public class DishUseCase implements IDishServicePort {
     public void saveDish(DishAndRestaurantOwnerIdDto dishAndRestaurantOwnerIdDto) {
         Restaurant restaurant = restaurantServicePort.findById(dishAndRestaurantOwnerIdDto.getDish().getRestaurant().getId());
         if(restaurant == null){
-            throw new NoDataFoundException();
+            throw new NoRestaurantFoundException();
         }
-        if(categoryServicePort.findById(dishAndRestaurantOwnerIdDto.getDish().getCategory().getId()) == null){
-            throw new NoDataFoundException();
+        Category category = categoryServicePort.findById(dishAndRestaurantOwnerIdDto.getDish().getCategory().getId());
+        if(category == null){
+            throw new NoCategoryFoundException();
         }
-        if(!restaurantServicePort.isTheRestaurantOwner(dishAndRestaurantOwnerIdDto.getIdOwnerRestaurant(), restaurant)){
+        if(Boolean.FALSE.equals(restaurantServicePort.isTheRestaurantOwner(dishAndRestaurantOwnerIdDto.getIdOwnerRestaurant(), restaurant))){
             throw new UserHasNoPermissionException();
         }
+        dishAndRestaurantOwnerIdDto.getDish().setCategory(category);
+        dishAndRestaurantOwnerIdDto.getDish().setRestaurant(restaurant);
         dishPersistencePort.saveDish(dishAndRestaurantOwnerIdDto.getDish());
     }
 

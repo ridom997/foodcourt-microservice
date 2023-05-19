@@ -61,12 +61,6 @@ class RestaurantUseCaseTest {
     }
 
     @Test()
-    void saveRestaurantTest_requiredVariableNotPresentException() {
-        final Restaurant restaurant = new Restaurant(null, null, "address", 1L, "+571231", "urlLogo", "123");
-        assertThrows(RequiredVariableNotPresentException.class, () -> restaurantUseCaseUnderTest.saveRestaurant(restaurant));
-    }
-
-    @Test()
     void savingRestaurantTest() {
         // Setup
         final Restaurant restaurant = new Restaurant(null, "name", "address", 1L, "+571231", "urlLogo", "123");

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.LinkedHashSet;
@@ -12,6 +13,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
+@NoArgsConstructor
 @Table(name = "restaurant")
 public class RestaurantEntity {
     @Id
@@ -49,4 +51,7 @@ public class RestaurantEntity {
     @OneToMany(mappedBy = "idRestaurant")
     private Set<OrderEntity> orderEntitySet = new LinkedHashSet<>();
 
+    public RestaurantEntity(Long id) {
+        this.id = id;
+    }
 }

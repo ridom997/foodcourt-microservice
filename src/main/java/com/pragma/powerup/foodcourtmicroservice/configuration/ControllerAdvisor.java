@@ -44,7 +44,7 @@ public class ControllerAdvisor {
     @ExceptionHandler(UserHasNoPermissionException.class)
     public ResponseEntity<Map<String, String>> handleUserHasNoPermission(UserHasNoPermissionException userHasNoPermissionException) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY, USER_HAS_NO_PERMISSIONS_MESSAGE));
+                .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY, USER_PROVIDED_DOES_NOT_HAVE_PERMISSION_MESSAGE));
     }
 
     @ExceptionHandler(UserNotFoundFeignException.class)
@@ -72,15 +72,27 @@ public class ControllerAdvisor {
                 .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY, INVALID_NUMBER_MESSAGE));
     }
 
-    @ExceptionHandler(RequiredVariableNotPresentException.class)
-    public ResponseEntity<Map<String, String>> handleRequiredVariableNotPresentException(RequiredVariableNotPresentException requiredVariableNotPresentException) {
+    @ExceptionHandler(FailValidatingRequiredVariableException.class)
+    public ResponseEntity<Map<String, String>> handleRFailValidatingRequiredVariableException(FailValidatingRequiredVariableException failValidatingRequiredVariableException) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY, REQUIRED_VARIABLE_MISSING_MESSAGE));
+                .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY, failValidatingRequiredVariableException.getMessage()));
     }
 
     @ExceptionHandler(FailConnectionToExternalMicroserviceException.class)
     public ResponseEntity<Map<String, String>> handleFailConnectionToExternalMicroserviceException(FailConnectionToExternalMicroserviceException failConnectionToExternalMicroserviceException) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY, INTERNAL_ERROR_APOLOGIZE_MESSAGE));
+    }
+
+    @ExceptionHandler(NoRestaurantFoundException.class)
+    public ResponseEntity<Map<String, String>> handleNoRestaurantFoundException(NoRestaurantFoundException noRestaurantFoundException) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY, RESTAURANT_NOT_FOUND_MESSAGE));
+    }
+
+    @ExceptionHandler(NoCategoryFoundException.class)
+    public ResponseEntity<Map<String, String>> handleNoCategoryFoundException(NoCategoryFoundException noCategoryFoundException) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY, CATEGORY_NOT_FOUND_MESSAGE));
     }
 }

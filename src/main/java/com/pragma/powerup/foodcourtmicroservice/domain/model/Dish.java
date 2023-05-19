@@ -1,6 +1,6 @@
 package com.pragma.powerup.foodcourtmicroservice.domain.model;
 
-import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.RequiredVariableNotPresentException;
+import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.FailValidatingRequiredVariableException;
 
 public class Dish {
     private Long id;
@@ -11,22 +11,6 @@ public class Dish {
     private Restaurant restaurant;
     private String urlImage;
     private Boolean active = true;
-
-    public Dish(Long id, String name, Category category, String description, Integer price, Restaurant restaurant, String urlImage) {
-        if (category == null ) throw new RequiredVariableNotPresentException();
-        if (restaurant == null) throw new RequiredVariableNotPresentException();
-        if (name == null || name.isEmpty()) throw new RequiredVariableNotPresentException();
-        if (description == null || description.isEmpty()) throw new RequiredVariableNotPresentException();
-        if (price == null || price <= 0) throw new RequiredVariableNotPresentException();
-        if (urlImage == null || urlImage.isEmpty()) throw new RequiredVariableNotPresentException();
-        this.id = id;
-        this.name = name;
-        this.category = category;
-        this.description = description;
-        this.price = price;
-        this.restaurant = restaurant;
-        this.urlImage = urlImage;
-    }
 
     public Dish() {
     }
@@ -44,6 +28,7 @@ public class Dish {
     }
 
     public void setName(String name) {
+        if (name == null || name.isEmpty()) throw new FailValidatingRequiredVariableException("Name is not present");
         this.name = name;
     }
 
@@ -52,6 +37,7 @@ public class Dish {
     }
 
     public void setCategory(Category category) {
+        if (category == null ) throw new FailValidatingRequiredVariableException("Category is not present");
         this.category = category;
     }
 
@@ -60,6 +46,7 @@ public class Dish {
     }
 
     public void setDescription(String description) {
+        if (description == null || description.isEmpty()) throw new FailValidatingRequiredVariableException("Description is not present");
         this.description = description;
     }
 
@@ -68,6 +55,7 @@ public class Dish {
     }
 
     public void setPrice(Integer price) {
+        if (price == null || price <= 0) throw new FailValidatingRequiredVariableException("Price is not present or not valid");
         this.price = price;
     }
 
@@ -76,6 +64,7 @@ public class Dish {
     }
 
     public void setRestaurant(Restaurant restaurant) {
+        if (restaurant == null) throw new FailValidatingRequiredVariableException("Restaurant is not present");
         this.restaurant = restaurant;
     }
 
@@ -84,6 +73,7 @@ public class Dish {
     }
 
     public void setUrlImage(String urlImage) {
+        if (urlImage == null || urlImage.isEmpty()) throw new FailValidatingRequiredVariableException("Url of image is not present");
         this.urlImage = urlImage;
     }
 

@@ -45,7 +45,15 @@ class DishUseCaseTest {
 
     @Test
     void testSaveDish_validatingCategory() {
-        final Dish dish = new Dish(1L,"name",category,"description",12,restaurant,"urlImage");
+        Dish dish = new Dish();
+        dish.setId(1L);
+        dish.setName("name");
+        dish.setCategory(category);
+        dish.setDescription("description");
+        dish.setPrice(12);
+        dish.setRestaurant(restaurant);
+        dish.setUrlImage("url");
+
         final DishAndRestaurantOwnerIdDto dishAndRestaurantOwnerIdDto = new DishAndRestaurantOwnerIdDto(dish,1L);
         when(restaurantServicePort.findById(restaurant.getId())).thenReturn(restaurant);
         when(restaurantServicePort.isTheRestaurantOwner(dishAndRestaurantOwnerIdDto.getIdOwnerRestaurant(),restaurant)).thenReturn(true);

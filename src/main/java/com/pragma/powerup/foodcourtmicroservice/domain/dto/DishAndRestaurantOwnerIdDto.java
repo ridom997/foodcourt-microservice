@@ -1,6 +1,6 @@
 package com.pragma.powerup.foodcourtmicroservice.domain.dto;
 
-import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.RequiredVariableNotPresentException;
+import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.FailValidatingRequiredVariableException;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Dish;
 
 public class DishAndRestaurantOwnerIdDto {
@@ -9,7 +9,7 @@ public class DishAndRestaurantOwnerIdDto {
 
     public DishAndRestaurantOwnerIdDto(Dish dish, Long idOwnerRestaurant) {
         this.dish = dish;
-        if (idOwnerRestaurant == null) throw new RequiredVariableNotPresentException();
+        if (idOwnerRestaurant == null) throw new FailValidatingRequiredVariableException("idOwnerRestaurant is not present");
         this.idOwnerRestaurant = idOwnerRestaurant;
     }
     public DishAndRestaurantOwnerIdDto() {

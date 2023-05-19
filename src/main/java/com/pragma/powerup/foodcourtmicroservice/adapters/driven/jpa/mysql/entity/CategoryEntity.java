@@ -3,6 +3,7 @@ package com.pragma.powerup.foodcourtmicroservice.adapters.driven.jpa.mysql.entit
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.LinkedHashSet;
@@ -11,6 +12,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
+@NoArgsConstructor
 @Table(name = "category")
 public class CategoryEntity {
     @Id
@@ -29,4 +31,7 @@ public class CategoryEntity {
     @OneToMany(mappedBy = "idCategory")
     private Set<DishEntity> dishEntities = new LinkedHashSet<>();
 
+    public CategoryEntity(Long id) {
+        this.id = id;
+    }
 }

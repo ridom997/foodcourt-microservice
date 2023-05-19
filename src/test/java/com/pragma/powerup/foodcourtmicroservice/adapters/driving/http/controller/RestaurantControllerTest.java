@@ -38,7 +38,7 @@ class RestaurantControllerTest {
     private final String RESPONSE_ERROR_MESSAGE_KEY_EXPECTED = "error";
     private final String NO_USER_ROLE_FOUND_MESSAGE_EXPECTED = "No user founded with provided id and role";
     private final String INTERNAL_ERROR_APOLOGIZE_MESSAGE_EXPECTED = "Something wrong happened, try again later!.";
-    private final String USER_HAS_NO_PERMISSIONS_MESSAGE_EXPECTED = "User does not have permissions to perform this action";
+    private final String USER_PROVIDED_DOES_NOT_HAVE_PERMISSION_MESSAGE_EXPECTED = "The user provided does not have permission";
 
     private RestaurantController restaurantController;
 
@@ -157,7 +157,7 @@ class RestaurantControllerTest {
     @Test
     void testCreateNewRestaurant_userHasNoPermissionToOwnARestaurantException() throws Exception {
         RestaurantRequestDto restaurantRequestDto = validRestaurantRequestDto();
-        Map<String, String> expectedResponseBody = Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY_EXPECTED, USER_HAS_NO_PERMISSIONS_MESSAGE_EXPECTED);
+        Map<String, String> expectedResponseBody = Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY_EXPECTED, USER_PROVIDED_DOES_NOT_HAVE_PERMISSION_MESSAGE_EXPECTED);
         doThrow(new UserHasNoPermissionException()).when(mockRestaurantHandler).saveRestaurant(any(RestaurantRequestDto.class));
 
         MockHttpServletResponse response = mockMvc.perform(post("/restaurants")

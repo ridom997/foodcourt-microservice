@@ -1,7 +1,7 @@
 package com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.controller;
 
-import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.request.RestaurantRequestDto;
-import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.handlers.IRestaurantHandler;
+import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.request.DishInfoRequestDto;
+import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.handlers.IDishHandler;
 import com.pragma.powerup.foodcourtmicroservice.configuration.Constants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -20,28 +20,27 @@ import java.util.Collections;
 import java.util.Map;
 
 @RestController()
-@RequestMapping("/restaurants")
+@RequestMapping("/dishes")
 @RequiredArgsConstructor
-/*@SecurityRequirement(name = "jwt")*/
-public class RestaurantController {
+public class DishController {
 
-    private final IRestaurantHandler restaurantHandler;
+    private final IDishHandler dishHandler;
 
-    @Operation(summary = "Add a new restaurant",
+    @Operation(summary = "Add a new dish",
             responses = {
-                    @ApiResponse(responseCode = "201", description = "Restaurant created",
+                    @ApiResponse(responseCode = "201", description = "Dish created",
                             content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Map"))),
-                    @ApiResponse(responseCode = "404", description = "Owner doesn't exists",
+                    @ApiResponse(responseCode = "400", description = "Malformed request body",
                             content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
-                    @ApiResponse(responseCode = "401", description = "User with id provided is not authorized",
+                    @ApiResponse(responseCode = "401", description = "The user provided does not have permission",
                             content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
-                    @ApiResponse(responseCode = "400", description = "Required variable is missing",
+                    @ApiResponse(responseCode = "404", description = "Category or restaurant not found",
                             content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error")))
             })
     @PostMapping
-    public ResponseEntity<Map<String, String>> createNewRestaurant(@Valid @RequestBody  RestaurantRequestDto restaurantRequestDto) {
-        restaurantHandler.saveRestaurant(restaurantRequestDto);
+    public ResponseEntity<Map<String, String>> createNewDish(@Valid @RequestBody DishInfoRequestDto dishInfoRequestDto) {
+        dishHandler.saveDish(dishInfoRequestDto);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY, Constants.RESTAURANT_CREATED_MESSAGE));
+                .body(Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY, Constants.DISH_CREATED_MESSAGE));
     }
 }

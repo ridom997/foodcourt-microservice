@@ -1,5 +1,7 @@
 package com.pragma.powerup.foodcourtmicroservice.domain.model;
 
+import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.FailValidatingRequiredVariableException;
+
 public class Restaurant {
     private Long id;
     private String name;
@@ -18,12 +20,12 @@ public class Restaurant {
 
     public Restaurant(Long id, String name, String address, Long idOwner, String phone, String urlLogo, String nit) {
         this.id = id;
-        this.name = name;
-        this.address = address;
-        this.idOwner = idOwner;
-        this.phone = phone;
-        this.urlLogo = urlLogo;
-        this.nit = nit;
+        setName(name);
+        setAddress(address);
+        setIdOwner(idOwner);
+        setPhone(phone);
+        setUrlLogo(urlLogo);
+        setNit(nit);
     }
 
     public Long getId() {
@@ -39,6 +41,7 @@ public class Restaurant {
     }
 
     public void setName(String name) {
+        if (name == null || name.isEmpty()) throw new FailValidatingRequiredVariableException("Name is not present");
         this.name = name;
     }
 
@@ -47,6 +50,7 @@ public class Restaurant {
     }
 
     public void setAddress(String address) {
+        if (address == null || address.isEmpty()) throw new FailValidatingRequiredVariableException("Address is not present");
         this.address = address;
     }
 
@@ -55,6 +59,7 @@ public class Restaurant {
     }
 
     public void setIdOwner(Long idOwner) {
+        if (idOwner == null) throw new FailValidatingRequiredVariableException("idOwner is not present");
         this.idOwner = idOwner;
     }
 
@@ -63,6 +68,7 @@ public class Restaurant {
     }
 
     public void setPhone(String phone) {
+        if (phone == null || phone.isEmpty()) throw new FailValidatingRequiredVariableException("Phone is not present");
         this.phone = phone;
     }
 
@@ -71,6 +77,7 @@ public class Restaurant {
     }
 
     public void setUrlLogo(String urlLogo) {
+        if (urlLogo == null || urlLogo.isEmpty()) throw new FailValidatingRequiredVariableException("Url logo is not present");
         this.urlLogo = urlLogo;
     }
 
@@ -79,6 +86,7 @@ public class Restaurant {
     }
 
     public void setNit(String nit) {
+        if (nit == null || nit.isEmpty()) throw new FailValidatingRequiredVariableException("Nit is not present");
         this.nit = nit;
     }
 }

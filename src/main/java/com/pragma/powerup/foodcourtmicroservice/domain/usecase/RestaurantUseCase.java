@@ -18,7 +18,6 @@ public class RestaurantUseCase implements IRestaurantServicePort {
 
     @Override
     public void saveRestaurant(Restaurant restaurant) {
-        try{
             if (!restaurant.getName().matches(Constants.ALPHANUMERIC_BUT_NOT_ONLY_NUMBERS_REGEX))
                 throw new NotValidNameRestaurantException();
             if (!restaurant.getPhone().matches(Constants.PHONE_REGEX))
@@ -29,9 +28,6 @@ public class RestaurantUseCase implements IRestaurantServicePort {
             if(userHasRole.equals(false))
                 throw new UserHasNoPermissionException();
             restaurantPersistancePort.saveRestaurant(restaurant);
-        } catch (NullPointerException e){
-            throw new RequiredVariableNotPresentException();
-        }
     }
 
     @Override

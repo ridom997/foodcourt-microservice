@@ -32,7 +32,10 @@ public class RestaurantUseCase implements IRestaurantServicePort {
 
     @Override
     public Restaurant findById(Long id) {
-        return restaurantPersistancePort.findById(id);
+        Restaurant restaurant = restaurantPersistancePort.findById(id);
+        if (restaurant == null)
+            throw new NoRestaurantFoundException();
+        return restaurant;
     }
 
     @Override

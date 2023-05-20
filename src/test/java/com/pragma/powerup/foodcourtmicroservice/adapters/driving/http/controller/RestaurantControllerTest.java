@@ -11,6 +11,7 @@ import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.UserHasNoPermi
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -42,7 +43,7 @@ class RestaurantControllerTest {
 
     private RestaurantController restaurantController;
 
-    @MockBean
+    @Mock
     private IRestaurantHandler mockRestaurantHandler;
 
     private MockMvc mockMvc;

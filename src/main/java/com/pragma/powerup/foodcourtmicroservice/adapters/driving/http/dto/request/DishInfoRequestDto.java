@@ -6,8 +6,10 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class DishInfoRequestDto {
@@ -22,7 +24,7 @@ public class DishInfoRequestDto {
     private String urlImage;
 
     @NotNull
-    @Min(value = 1)
+    @Min(value = 1, message = "Price must be grater than 0")
     private Integer price;
 
     @NotNull

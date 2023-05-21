@@ -12,8 +12,6 @@ public class Dish {
     private String urlImage;
     private Boolean active = true;
 
-    public Dish() {
-    }
 
     public Long getId() {
         return id;

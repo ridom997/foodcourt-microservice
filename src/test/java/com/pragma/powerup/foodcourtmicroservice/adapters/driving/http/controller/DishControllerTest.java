@@ -2,17 +2,13 @@ package com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.controlle
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pragma.powerup.foodcourtmicroservice.adapters.driven.feign.exceptions.UserNotFoundFeignException;
-import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.request.DishInfoRequestDto;
-import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.request.RestaurantRequestDto;
+import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.request.NewDishInfoRequestDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.handlers.IDishHandler;
-import com.pragma.powerup.foodcourtmicroservice.configuration.Constants;
 import com.pragma.powerup.foodcourtmicroservice.configuration.ControllerAdvisor;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.NoCategoryFoundException;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.NoRestaurantFoundException;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.UserHasNoPermissionException;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,7 +16,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -62,8 +57,8 @@ class DishControllerTest {
         return new ObjectMapper().readValue(json, Map.class);
     }
 
-    private DishInfoRequestDto validDishInfoRequest(){
-        return new DishInfoRequestDto(
+    private NewDishInfoRequestDto validDishInfoRequest(){
+        return new NewDishInfoRequestDto(
                         "Pizza Margherita",
                         "Tomato sauce, mozzarella, and basil",
                         "https://www.example.com/pizza-margherita.jpg",
@@ -84,13 +79,13 @@ class DishControllerTest {
         assertAll(
                 () -> assertEquals(HttpStatus.CREATED.value(),response.getStatus()),
                 () -> assertEquals(expectedResponseBody,jsonToMap(response.getContentAsString())),
-                () -> verify(dishHandler).saveDish(any(DishInfoRequestDto.class))
+                () -> verify(dishHandler).saveDish(any(NewDishInfoRequestDto.class))
         );
     }
 
     @Test
     void createNewDishTest_failValidationPrice() throws Exception{
-        DishInfoRequestDto dishInfoRequestDtoBadPrice = validDishInfoRequest();
+        NewDishInfoRequestDto dishInfoRequestDtoBadPrice = validDishInfoRequest();
         dishInfoRequestDtoBadPrice.setPrice(-1);
 
         MockHttpServletResponse response = mockMvc.perform(post("/dishes")
@@ -111,7 +106,7 @@ class DishControllerTest {
     @Test
     void createNewDishTest_userHasNoPermissionException() throws Exception {
         Map<String, String> expectedResponseBody = Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY_EXPECTED, "The user provided does not have permission");
-        doThrow(new UserHasNoPermissionException()).when(dishHandler).saveDish(any(DishInfoRequestDto.class));
+        doThrow(new UserHasNoPermissionException()).when(dishHandler).saveDish(any(NewDishInfoRequestDto.class));
 
         MockHttpServletResponse response = mockMvc.perform(post("/dishes")
                         .content(mapToJson(validDishInfoRequest()))
@@ -122,13 +117,13 @@ class DishControllerTest {
         assertAll(
                 () -> assertEquals(HttpStatus.UNAUTHORIZED.value(),response.getStatus()),
                 () -> assertEquals(expectedResponseBody,jsonToMap(response.getContentAsString())),
-                () -> verify(dishHandler).saveDish(any(DishInfoRequestDto.class)));
+                () -> verify(dishHandler).saveDish(any(NewDishInfoRequestDto.class)));
     }
 
     @Test
     void createNewDishTest_noRestaurantFoundException() throws Exception {
         Map<String, String> expectedResponseBody = Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY_EXPECTED, "Restaurant not found");
-        doThrow(new NoRestaurantFoundException()).when(dishHandler).saveDish(any(DishInfoRequestDto.class));
+        doThrow(new NoRestaurantFoundException()).when(dishHandler).saveDish(any(NewDishInfoRequestDto.class));
 
         MockHttpServletResponse response = mockMvc.perform(post("/dishes")
                         .content(mapToJson(validDishInfoRequest()))
@@ -139,13 +134,13 @@ class DishControllerTest {
         assertAll(
                 () -> assertEquals(HttpStatus.NOT_FOUND.value(),response.getStatus()),
                 () -> assertEquals(expectedResponseBody,jsonToMap(response.getContentAsString())),
-                () -> verify(dishHandler).saveDish(any(DishInfoRequestDto.class)));
+                () -> verify(dishHandler).saveDish(any(NewDishInfoRequestDto.class)));
     }
 
     @Test
     void createNewDishTest_noCategoryFoundException() throws Exception {
         Map<String, String> expectedResponseBody = Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY_EXPECTED, "Category not found");
-        doThrow(new NoCategoryFoundException()).when(dishHandler).saveDish(any(DishInfoRequestDto.class));
+        doThrow(new NoCategoryFoundException()).when(dishHandler).saveDish(any(NewDishInfoRequestDto.class));
 
         MockHttpServletResponse response = mockMvc.perform(post("/dishes")
                         .content(mapToJson(validDishInfoRequest()))
@@ -156,7 +151,7 @@ class DishControllerTest {
         assertAll(
                 () -> assertEquals(HttpStatus.NOT_FOUND.value(),response.getStatus()),
                 () -> assertEquals(expectedResponseBody,jsonToMap(response.getContentAsString())),
-                () -> verify(dishHandler).saveDish(any(DishInfoRequestDto.class)));
+                () -> verify(dishHandler).saveDish(any(NewDishInfoRequestDto.class)));
     }
 
 

@@ -1,6 +1,6 @@
-package com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.mapper;
+package com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.mapper.request;
 
-import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.request.DishInfoRequestDto;
+import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.request.NewDishInfoRequestDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Category;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Dish;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Restaurant;
@@ -26,6 +26,6 @@ public interface IDishRequestMapper {
 
     @Mapping(source = "dishInfoRequestDto.idCategory", target = "category", qualifiedByName = "mapToCategory")
     @Mapping(source = "dishInfoRequestDto.idRestaurant", target = "restaurant", qualifiedByName = "mapToRestaurant")
-    Dish mapToDish(DishInfoRequestDto dishInfoRequestDto);
+    Dish mapToDish(NewDishInfoRequestDto dishInfoRequestDto);
 
 }

@@ -1,4 +1,4 @@
-package com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.mapper;
+package com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.mapper.request;
 
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.request.RestaurantRequestDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Restaurant;

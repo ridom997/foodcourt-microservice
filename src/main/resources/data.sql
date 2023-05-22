@@ -5,3 +5,12 @@ INSERT INTO `user` ( address, dni_number, id_dni_type, id_person_type, mail, nam
 
 -- HU -- 3
 ALTER TABLE powerup.restaurant ADD CONSTRAINT restaurant_FK FOREIGN KEY (id_owner) REFERENCES powerup.`user`(id);
+
+
+
+
+
+
+-- HU -- 4
+-- Add this dish so we can edit it using the endpoint "/dishes/{id}" (id = 100), in the request body: idOwnerRestaurant = 100)
+INSERT INTO powerup.dish (id, active, description, name, price, url_image, id_category, id_restaurant) VALUES(100, 1, 'Arroz, frijoles y carne', 'Tipico mexicano 1', 11500, 'https://cdn0.recetasgratis.net/es/posts/1/4/0/arroz_con_carne_molida_74041_600.webp', 100, 100);

@@ -55,7 +55,7 @@ public class DishController {
                     @ApiResponse(responseCode = "404", description = "Dish not found",
                             content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error")))
             })
-    @PutMapping("/{id}")
+    @PatchMapping(value = "/{id}")
     public ResponseEntity<DishResponseDto> editDish(@PathVariable("id") @NotNull Long idDish , @Valid @RequestBody EditDishRequestDto editDishRequestDto) {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(dishHandler.editDish(idDish, editDishRequestDto));

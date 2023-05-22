@@ -29,5 +29,14 @@ public interface IDishEntityMapper {
     @Mapping(source = "dish.category", target = "idCategory", qualifiedByName = "mapToCategoryEntity")
     @Mapping(source = "dish.restaurant", target = "idRestaurant", qualifiedByName = "mapToRestaurantEntity")
     DishEntity toEntity(Dish dish);
+
+    @Named("mapToCategory")
+    Category mapToCategory(CategoryEntity categoryEntity);
+
+    @Named("mapToRestaurant")
+    Restaurant mapToResturant(RestaurantEntity restaurantEntity);
+
+    @Mapping(source = "dishEntity.idCategory", target = "category", qualifiedByName = "mapToCategory")
+    @Mapping(source = "dishEntity.idRestaurant", target = "restaurant", qualifiedByName = "mapToRestaurant")
     Dish toDish(DishEntity dishEntity);
 }

@@ -9,3 +9,6 @@ ALTER TABLE powerup.restaurant ADD CONSTRAINT restaurant_FK FOREIGN KEY (id_owne
 INSERT INTO powerup.category (id,description, name) VALUES(100,'Mexican food', 'Mexican');
 INSERT INTO powerup.restaurant (id,address, id_owner, name, nit, phone, url_logo) VALUES(100,'Unicentro CC', 100, 'Food Pragmatica', '123321', '333333333', 'https://www.pragma.com.co/hubfs/pragma_theme2021/images/Header%20Logo.svg');
 
+-- HU -- 4
+-- Add this dish so we can edit it using the endpoint "/dishes/{id}" (id = 100), in the request body: idOwnerRestaurant = 100)
+INSERT INTO powerup.dish (id, active, description, name, price, url_image, id_category, id_restaurant) VALUES(100, 1, 'Arroz, frijoles y carne', 'Tipico mexicano 1', 11500, 'https://cdn0.recetasgratis.net/es/posts/1/4/0/arroz_con_carne_molida_74041_600.webp', 100, 100);

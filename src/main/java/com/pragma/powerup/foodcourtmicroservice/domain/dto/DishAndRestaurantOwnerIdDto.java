@@ -9,8 +9,7 @@ public class DishAndRestaurantOwnerIdDto {
 
     public DishAndRestaurantOwnerIdDto(Dish dish, Long idOwnerRestaurant) {
         this.dish = dish;
-        if (idOwnerRestaurant == null) throw new FailValidatingRequiredVariableException("idOwnerRestaurant is not present");
-        this.idOwnerRestaurant = idOwnerRestaurant;
+        setIdOwnerRestaurant(idOwnerRestaurant);
     }
     public DishAndRestaurantOwnerIdDto() {
     }
@@ -27,6 +26,7 @@ public class DishAndRestaurantOwnerIdDto {
     }
 
     public void setIdOwnerRestaurant(Long idOwnerRestaurant) {
+        if (idOwnerRestaurant == null) throw new FailValidatingRequiredVariableException("idOwnerRestaurant is not present");
         this.idOwnerRestaurant = idOwnerRestaurant;
     }
 }

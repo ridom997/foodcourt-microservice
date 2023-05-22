@@ -1,5 +1,6 @@
 package com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -8,31 +9,20 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class DishInfoRequestDto {
-
-    @NotBlank
-    private String name;
-
-    @NotBlank
-    private String description;
-
-    @NotBlank
-    private String urlImage;
-
+@Getter
+@Setter
+public class EditDishRequestDto {
     @NotNull
-    @Min(value = 1, message = "Price must be grater than 0")
-    private Integer price;
-
-    @NotNull
+    @Schema(example = "2")
     private Long idOwnerRestaurant;
 
     @NotNull
-    private Long idCategory;
+    @Min(value = 1, message = "Price must be grater than 0")
+    @Schema(example = "20000")
+    private Integer price;
 
-    @NotNull
-    private Long idRestaurant;
+    @NotBlank
+    private String description;
 }

@@ -36,6 +36,8 @@ public class Constants {
     public static final String INTERNAL_ERROR_APOLOGIZE_MESSAGE = "Something wrong happened, try again later!.";
     public static final String RESTAURANT_NOT_FOUND_MESSAGE = "Restaurant not found";
     public static final String CATEGORY_NOT_FOUND_MESSAGE = "Category not found";
+    public static final String DISH_NOT_FOUND_MESSAGE = "Dish not found";
+    public static final String ERROR_PARSING_MESSAGE = "Error parsing a request variable";
 
 
 }

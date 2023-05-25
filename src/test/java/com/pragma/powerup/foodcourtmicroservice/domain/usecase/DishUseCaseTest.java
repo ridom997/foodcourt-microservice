@@ -10,6 +10,7 @@ import com.pragma.powerup.foodcourtmicroservice.domain.model.Category;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Dish;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Restaurant;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.IDishPersistencePort;
+import com.pragma.powerup.foodcourtmicroservice.domain.spi.ITokenValidationPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,6 +34,9 @@ class DishUseCaseTest {
     @Mock
     private ICategoryServicePort categoryServicePort;
 
+    @Mock
+    private ITokenValidationPort tokenValidationPort;
+
     @InjectMocks
     private DishUseCase dishUseCase;
 
@@ -43,7 +47,7 @@ class DishUseCaseTest {
 
     @BeforeEach
     void setUp() {
-        dishUseCase = new DishUseCase(dishPersistancePort, categoryServicePort, restaurantServicePort);
+        dishUseCase = new DishUseCase(dishPersistancePort, categoryServicePort, restaurantServicePort, tokenValidationPort);
         category = new Category(1L,"name","description");
         restaurant = new Restaurant();
         idealDish = new Dish();
@@ -62,8 +66,9 @@ class DishUseCaseTest {
         when(restaurantServicePort.findById(restaurant.getId())).thenReturn(restaurant);
         when(restaurantServicePort.isTheRestaurantOwner(dishAndRestaurantOwnerIdDto.getIdOwnerRestaurant(),restaurant)).thenReturn(true);
         when(categoryServicePort.findById(category.getId())).thenReturn(category);
+        when(tokenValidationPort.userIsInToken(dishAndRestaurantOwnerIdDto.getIdOwnerRestaurant(),"token")).thenReturn(true);
 
-        dishUseCase.saveDish(dishAndRestaurantOwnerIdDto);
+        dishUseCase.saveDish(dishAndRestaurantOwnerIdDto,"token");
 
         verify(restaurantServicePort).isTheRestaurantOwner(1L,restaurant);
         verify(restaurantServicePort).findById(restaurant.getId());
@@ -77,12 +82,23 @@ class DishUseCaseTest {
         when(restaurantServicePort.findById(restaurant.getId())).thenReturn(restaurant);
         when(restaurantServicePort.isTheRestaurantOwner(dishAndRestaurantOwnerIdDto.getIdOwnerRestaurant(),restaurant)).thenReturn(false);
         when(categoryServicePort.findById(category.getId())).thenReturn(category);
+        when(tokenValidationPort.userIsInToken(dishAndRestaurantOwnerIdDto.getIdOwnerRestaurant(),"token")).thenReturn(true);
 
-        assertThrows(UserHasNoPermissionException.class, () -> dishUseCase.saveDish(dishAndRestaurantOwnerIdDto));
+        assertThrows(UserHasNoPermissionException.class, () -> dishUseCase.saveDish(dishAndRestaurantOwnerIdDto,"token"));
 
         verify(restaurantServicePort).isTheRestaurantOwner(1L,restaurant);
         verify(restaurantServicePort).findById(restaurant.getId());
         verify(categoryServicePort).findById(category.getId());
+    }
+
+    @Test
+    void saveDishTest_userHasNoPermissionBecauseUserIsNotInTokenException() {
+        final DishAndRestaurantOwnerIdDto dishAndRestaurantOwnerIdDto = new DishAndRestaurantOwnerIdDto(idealDish,1L);
+        when(tokenValidationPort.userIsInToken(dishAndRestaurantOwnerIdDto.getIdOwnerRestaurant(),"token")).thenReturn(false);
+
+        assertThrows(UserHasNoPermissionException.class, () -> dishUseCase.saveDish(dishAndRestaurantOwnerIdDto,"token"));
+
+        verify(dishPersistancePort, times(0)).saveDish(idealDish);
     }
 
     @Test
@@ -91,8 +107,9 @@ class DishUseCaseTest {
         final EditDishInfoDto editDishInfoDto = new EditDishInfoDto(1L,idDish,3,"description edited");
         when(dishPersistancePort.findById(idDish)).thenReturn(idealDish);
         when(restaurantServicePort.isTheRestaurantOwner(editDishInfoDto.getIdOwnerRestaurant(),idealDish.getRestaurant())).thenReturn(true);
+        when(tokenValidationPort.userIsInToken(editDishInfoDto.getIdOwnerRestaurant(),"token")).thenReturn(true);
 
-        Dish resultDish = dishUseCase.editDish(editDishInfoDto);
+        Dish resultDish = dishUseCase.editDish(editDishInfoDto,"token");
 
         assertEquals("description edited",resultDish.getDescription());
         assertEquals(3,resultDish.getPrice());
@@ -107,11 +124,23 @@ class DishUseCaseTest {
         final EditDishInfoDto editDishInfoDto = new EditDishInfoDto(1L,idDish,3,"description edited");
         when(dishPersistancePort.findById(idDish)).thenReturn(idealDish);
         when(restaurantServicePort.isTheRestaurantOwner(editDishInfoDto.getIdOwnerRestaurant(),idealDish.getRestaurant())).thenReturn(false);
+        when(tokenValidationPort.userIsInToken(editDishInfoDto.getIdOwnerRestaurant(),"token")).thenReturn(true);
 
-        assertThrows(UserHasNoPermissionException.class,() -> dishUseCase.editDish(editDishInfoDto));
+        assertThrows(UserHasNoPermissionException.class,() -> dishUseCase.editDish(editDishInfoDto,"token"));
 
         verify(restaurantServicePort).isTheRestaurantOwner(1L,idealDish.getRestaurant());
         verify(dishPersistancePort).findById(idDish);
+        verify(dishPersistancePort, times(0)).saveDish(idealDish);
+    }
+
+    @Test
+    void editDishTest_userHasNoPermissionBecauseIsNotInTokenException() {
+        Long idDish = 1L;
+        final EditDishInfoDto editDishInfoDto = new EditDishInfoDto(1L,idDish,3,"description edited");
+        when(tokenValidationPort.userIsInToken(editDishInfoDto.getIdOwnerRestaurant(),"token")).thenReturn(false);
+
+        assertThrows(UserHasNoPermissionException.class,() -> dishUseCase.editDish(editDishInfoDto,"token"));
+
         verify(dishPersistancePort, times(0)).saveDish(idealDish);
     }
 

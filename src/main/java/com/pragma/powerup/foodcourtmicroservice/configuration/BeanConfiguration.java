@@ -10,12 +10,15 @@ import com.pragma.powerup.foodcourtmicroservice.adapters.driven.jpa.mysql.mapper
 import com.pragma.powerup.foodcourtmicroservice.adapters.driven.jpa.mysql.repositories.ICategoryEntityRepository;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driven.jpa.mysql.repositories.IDishEntityRepository;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driven.jpa.mysql.repositories.IRestaurantEntityRepository;
+import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.adapter.TokenValidationSpringAdapter;
+import com.pragma.powerup.foodcourtmicroservice.configuration.security.jwt.JwtProvider;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.ICategoryServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IDishServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IRestaurantServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.ICategoryPersistencePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.IDishPersistencePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.IRestaurantPersistencePort;
+import com.pragma.powerup.foodcourtmicroservice.domain.spi.ITokenValidationPort;
 import com.pragma.powerup.foodcourtmicroservice.domain.usecase.CategoryUseCase;
 import com.pragma.powerup.foodcourtmicroservice.domain.usecase.DishUseCase;
 import com.pragma.powerup.foodcourtmicroservice.domain.usecase.RestaurantUseCase;
@@ -37,6 +40,8 @@ public class BeanConfiguration {
 
     private final ICategoryEntityMapper categoryEntityMapper;
     private final ICategoryEntityRepository categoryEntityRepository;
+
+    private final JwtProvider jwtProvider;
 
     @Bean
     public IRestaurantPersistencePort restaurantPersistancePort(){
@@ -64,7 +69,11 @@ public class BeanConfiguration {
     }
 
     @Bean
+    public ITokenValidationPort tokenValidationPort(){
+        return new TokenValidationSpringAdapter(jwtProvider);
+    }
+    @Bean
     public IDishServicePort dishServicePort(){
-        return new DishUseCase(dishPersistancePort(),categoryServicePort(),restaurantServicePort());
+        return new DishUseCase(dishPersistancePort(),categoryServicePort(),restaurantServicePort(), tokenValidationPort());
     }
 }

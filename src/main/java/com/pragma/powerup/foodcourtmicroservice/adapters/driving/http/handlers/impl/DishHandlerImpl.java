@@ -6,6 +6,7 @@ import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.respon
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.handlers.IDishHandler;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.mapper.request.IDishRequestMapper;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.mapper.response.IDishResponseMapper;
+import com.pragma.powerup.foodcourtmicroservice.configuration.security.jwt.JwtUtils;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IDishServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.DishAndRestaurantOwnerIdDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.EditDishInfoDto;
@@ -24,12 +25,12 @@ public class DishHandlerImpl implements IDishHandler {
     @Override
     public void saveDish(NewDishInfoRequestDto dishInfoRequestDto) {
         Dish dish = dishRequestMapper.mapToDish(dishInfoRequestDto);
-        dishServicePort.saveDish(new DishAndRestaurantOwnerIdDto(dish,dishInfoRequestDto.getIdOwnerRestaurant()));
+        dishServicePort.saveDish(new DishAndRestaurantOwnerIdDto(dish,dishInfoRequestDto.getIdOwnerRestaurant()), JwtUtils.getTokenFromRequestHeaders());
     }
     @Override
     public DishResponseDto editDish(Long idDish, EditDishRequestDto editDishRequestDto) {
         EditDishInfoDto editDishInfoDto = new EditDishInfoDto(editDishRequestDto.getIdOwnerRestaurant(),
                 idDish,editDishRequestDto.getPrice(),editDishRequestDto.getDescription());
-        return dishResponseMapper.toDishResponseDto(dishServicePort.editDish(editDishInfoDto));
+        return dishResponseMapper.toDishResponseDto(dishServicePort.editDish(editDishInfoDto,JwtUtils.getTokenFromRequestHeaders()));
     }
 }

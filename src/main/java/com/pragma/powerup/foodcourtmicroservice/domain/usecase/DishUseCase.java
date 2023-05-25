@@ -11,6 +11,7 @@ import com.pragma.powerup.foodcourtmicroservice.domain.model.Category;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Dish;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Restaurant;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.IDishPersistencePort;
+import com.pragma.powerup.foodcourtmicroservice.domain.spi.ITokenValidationPort;
 
 
 public class DishUseCase implements IDishServicePort {
@@ -19,14 +20,20 @@ public class DishUseCase implements IDishServicePort {
     private final ICategoryServicePort categoryServicePort;
     private final IRestaurantServicePort restaurantServicePort;
 
-    public DishUseCase(IDishPersistencePort dishPersistencePort, ICategoryServicePort categoryServicePort, IRestaurantServicePort restaurantServicePort) {
+    private final ITokenValidationPort tokenValidationPort;
+
+    public DishUseCase(IDishPersistencePort dishPersistencePort, ICategoryServicePort categoryServicePort, IRestaurantServicePort restaurantServicePort, ITokenValidationPort tokenValidationPort) {
         this.dishPersistencePort = dishPersistencePort;
         this.categoryServicePort = categoryServicePort;
         this.restaurantServicePort = restaurantServicePort;
+        this.tokenValidationPort = tokenValidationPort;
     }
 
     @Override
-    public void saveDish(DishAndRestaurantOwnerIdDto dishAndRestaurantOwnerIdDto) {
+    public void saveDish(DishAndRestaurantOwnerIdDto dishAndRestaurantOwnerIdDto, String token) {
+        Boolean userIsInToken = tokenValidationPort.userIsInToken(dishAndRestaurantOwnerIdDto.getIdOwnerRestaurant(), token);
+        if (userIsInToken.equals(false))
+            throw new UserHasNoPermissionException();
         Restaurant restaurant = restaurantServicePort.findById(dishAndRestaurantOwnerIdDto.getDish().getRestaurant().getId());
         Category category = categoryServicePort.findById(dishAndRestaurantOwnerIdDto.getDish().getCategory().getId());
         if(Boolean.FALSE.equals(restaurantServicePort.isTheRestaurantOwner(dishAndRestaurantOwnerIdDto.getIdOwnerRestaurant(), restaurant))){
@@ -38,7 +45,10 @@ public class DishUseCase implements IDishServicePort {
     }
 
     @Override
-    public Dish editDish(EditDishInfoDto editDishInfoDto) {
+    public Dish editDish(EditDishInfoDto editDishInfoDto, String token) {
+        Boolean userIsInToken = tokenValidationPort.userIsInToken(editDishInfoDto.getIdOwnerRestaurant(), token);
+        if (userIsInToken.equals(false))
+            throw new UserHasNoPermissionException();
         Dish dish = findById(editDishInfoDto.getIdDish());
         if(Boolean.FALSE.equals(restaurantServicePort.isTheRestaurantOwner(editDishInfoDto.getIdOwnerRestaurant(), dish.getRestaurant()))){
             throw new UserHasNoPermissionException();

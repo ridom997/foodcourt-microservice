@@ -52,8 +52,15 @@ To get a local copy up and running follow these steps.
 1. Right-click the class FoodCourtMicroserviceApplication and choose Run
 3. Start the user-microservice ["user-microservice"](https://github.com/ridom997/user-microservice)
 4.  Open [http://localhost:8091/swagger-ui/index.html](http://localhost:8091/swagger-ui/index.html) in your web browser
-5. Use the endpoints
+5. Test the endpoints (view guide)
 
+<!-- GUIDE -->
+## GUIDE (SPANISH)
+-El usuario insertado corresponde a un propietario con correo: corr@e.o, contraseña= 1234. (dicho usuario tiene id = 100) \
++ HU2: Crear un nuevo restaurante "/restaurants" Se puede proporcionar como idOwner = 100 que es el usuario previamente insertado con el script data.sql (es necesario tener el microservicio usuarios corriendo).
++ HU3: Crear un plato "/dishes", se puede usar como idOwnerRestaurant = 100, idCategory=100, idRestaurant = 100
++ HU4: Editar plato /dishes/{id}, se puede poner de path variable (id del dish) id = 100, idOwnerRestaurant = 100.
++ HU5: Para poder usar los endpoints es necesario utilizar el microservicio de  usuarios para autenticarse como admin o como propietario.
 
 <!-- ROADMAP -->
 ## Tests

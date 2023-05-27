@@ -4,9 +4,9 @@ import com.pragma.powerup.foodcourtmicroservice.configuration.Constants;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.*;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Restaurant;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.IRestaurantPersistencePort;
+import com.pragma.powerup.foodcourtmicroservice.domain.spi.ITokenValidationPort;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.IUserValidationComunicationPort;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -24,13 +24,85 @@ class RestaurantUseCaseTest {
     @Mock
     private IUserValidationComunicationPort mockUserValidationComunicationPort;
 
+    @Mock
+    private ITokenValidationPort tokenValidationPort;
+
     private RestaurantUseCase restaurantUseCaseUnderTest;
 
     @BeforeEach
     void setUp() {
         restaurantUseCaseUnderTest =
                 new RestaurantUseCase(
-                        mockRestaurantPersistancePort, mockUserValidationComunicationPort);
+                        mockRestaurantPersistancePort, mockUserValidationComunicationPort, tokenValidationPort);
+    }
+
+    @Test
+    void isTheRestaurantOwner_idRestaurantIsNull() {
+        String tokenJwt = "token";
+        Long idRestaurant = null;
+
+        assertThrows(
+                FailValidatingRequiredVariableException.class,
+                () -> {
+                    restaurantUseCaseUnderTest.isTheRestaurantOwner(tokenJwt, idRestaurant);
+                });
+    }
+
+    @Test
+    void isTheRestaurantOwnerTest_tokenIsNull() {
+        String tokenJwt = null;
+        Long idRestaurant = 1L;
+
+        assertThrows(
+                FailValidatingRequiredVariableException.class,
+                () -> {
+                    restaurantUseCaseUnderTest.isTheRestaurantOwner(tokenJwt, idRestaurant);
+                });
+    }
+
+    @Test
+    void isTheRestaurantOwner_userIsNotOwner() {
+        String tokenJwt = "token";
+        Long idRestaurant = 2L;
+        Restaurant restaurant =
+                new Restaurant(
+                        idRestaurant,
+                        "Restaurant Name",
+                        "Address",
+                        3L,
+                        "1234567890",
+                        "urlLogo",
+                        "123456789");
+        when(mockRestaurantPersistancePort.findById(idRestaurant)).thenReturn(restaurant);
+        when(tokenValidationPort.findIdUserFromToken(tokenJwt)).thenReturn(4L);
+
+        Boolean result = restaurantUseCaseUnderTest.isTheRestaurantOwner(tokenJwt, idRestaurant);
+
+        assertFalse(result);
+        verify(mockRestaurantPersistancePort).findById(idRestaurant);
+    }
+
+    @Test
+    void isTheRestaurantOwner_successfully() {
+        String tokenJwt = "token";
+        Long idRestaurant = 2L;
+        Long idOwner = 3L;
+        Restaurant restaurant =
+                new Restaurant(
+                        idRestaurant,
+                        "Restaurant Name",
+                        "Address",
+                        idOwner,
+                        "1234567890",
+                        "urlLogo",
+                        "123456789");
+        when(mockRestaurantPersistancePort.findById(idRestaurant)).thenReturn(restaurant);
+        when(tokenValidationPort.findIdUserFromToken(tokenJwt)).thenReturn(idOwner);
+
+        Boolean result = restaurantUseCaseUnderTest.isTheRestaurantOwner(tokenJwt, idRestaurant);
+
+        assertTrue(result);
+        verify(mockRestaurantPersistancePort).findById(idRestaurant);
     }
 
     @Test

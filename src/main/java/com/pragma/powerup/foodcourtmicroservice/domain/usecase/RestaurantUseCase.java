@@ -5,15 +5,18 @@ import com.pragma.powerup.foodcourtmicroservice.domain.api.IRestaurantServicePor
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.*;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Restaurant;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.IRestaurantPersistencePort;
+import com.pragma.powerup.foodcourtmicroservice.domain.spi.ITokenValidationPort;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.IUserValidationComunicationPort;
 
 public class RestaurantUseCase implements IRestaurantServicePort {
     private final IRestaurantPersistencePort restaurantPersistancePort;
     private final IUserValidationComunicationPort userValidationComunicationPort;
+    private final ITokenValidationPort tokenValidationPort;
 
-    public RestaurantUseCase(IRestaurantPersistencePort restaurantPersistancePort, IUserValidationComunicationPort userValidationComunicationPort) {
+    public RestaurantUseCase(IRestaurantPersistencePort restaurantPersistancePort, IUserValidationComunicationPort userValidationComunicationPort, ITokenValidationPort tokenValidationPort) {
         this.restaurantPersistancePort = restaurantPersistancePort;
         this.userValidationComunicationPort = userValidationComunicationPort;
+        this.tokenValidationPort = tokenValidationPort;
     }
 
     @Override
@@ -41,6 +44,20 @@ public class RestaurantUseCase implements IRestaurantServicePort {
     @Override
     public Boolean isTheRestaurantOwner(Long idUser, Restaurant restaurant) {
         return restaurant.getIdOwner().equals(idUser);
+    }
+
+    @Override
+    public Boolean isTheRestaurantOwner(String tokenJwt, Long idRestaurant) {
+        if (tokenJwt == null)
+            throw new FailValidatingRequiredVariableException("Token is not present");
+        if(idRestaurant == null)
+            throw new FailValidatingRequiredVariableException("idRestaurant is not present");
+        Long idUserFromToken = tokenValidationPort.findIdUserFromToken(tokenJwt);
+        if (idUserFromToken == null)
+            throw new NoUserIdFoundInTokenException();
+        Restaurant restaurant = findById(idRestaurant);
+        //it isn't necessary check if the restaurant has an owner because if not, the domain model will throw a FailValidatingRequiredVariableException.
+        return restaurant.getIdOwner().equals(idUserFromToken);
     }
 
 

@@ -50,7 +50,7 @@ public class BeanConfiguration {
 
     @Bean
     public IRestaurantServicePort restaurantServicePort(){
-        return new RestaurantUseCase(restaurantPersistancePort(), userValidationServicePort);
+        return new RestaurantUseCase(restaurantPersistancePort(), userValidationServicePort, tokenValidationPort());
     }
 
     @Bean

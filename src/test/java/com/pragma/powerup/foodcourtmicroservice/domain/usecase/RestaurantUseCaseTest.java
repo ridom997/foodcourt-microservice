@@ -61,6 +61,18 @@ class RestaurantUseCaseTest {
     }
 
     @Test
+    void isTheRestaurantOwnerTest_idUserIsNotPresentInToken() {
+        String tokenJwt = "noHayIdUser";
+        Long idRestaurant = 1L;
+        when(tokenValidationPort.findIdUserFromToken(tokenJwt)).thenReturn(null);
+
+        assertThrows(
+                NoIdUserFoundInTokenException.class,
+                () -> {
+                    restaurantUseCaseUnderTest.isTheRestaurantOwner(tokenJwt, idRestaurant);
+                });
+    }
+    @Test
     void isTheRestaurantOwner_userIsNotOwner() {
         String tokenJwt = "token";
         Long idRestaurant = 2L;

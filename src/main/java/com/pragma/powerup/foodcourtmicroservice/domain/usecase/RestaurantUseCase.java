@@ -54,7 +54,7 @@ public class RestaurantUseCase implements IRestaurantServicePort {
             throw new FailValidatingRequiredVariableException("idRestaurant is not present");
         Long idUserFromToken = tokenValidationPort.findIdUserFromToken(tokenJwt);
         if (idUserFromToken == null)
-            throw new NoUserIdFoundInTokenException();
+            throw new NoIdUserFoundInTokenException();
         Restaurant restaurant = findById(idRestaurant);
         //it isn't necessary check if the restaurant has an owner because if not, the domain model will throw a FailValidatingRequiredVariableException.
         return restaurant.getIdOwner().equals(idUserFromToken);

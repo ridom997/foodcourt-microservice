@@ -3,6 +3,7 @@ package com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.handlers.
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.request.RestaurantRequestDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.handlers.IRestaurantHandler;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.mapper.request.IRestaurantRequestMapper;
+import com.pragma.powerup.foodcourtmicroservice.configuration.security.jwt.JwtUtils;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IRestaurantServicePort;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,5 +19,10 @@ public class RestaurantHandlerImpl implements IRestaurantHandler {
     @Override
     public void saveRestaurant(RestaurantRequestDto restaurantRequestDto) {
         restaurantServicePort.saveRestaurant(restaurantRequestMapper.toRestaurant(restaurantRequestDto));
+    }
+
+    @Override
+    public Boolean userIsTheRestaurantOwner(Long idRestaurant) {
+        return restaurantServicePort.isTheRestaurantOwner(JwtUtils.getTokenFromRequestHeaders(), idRestaurant);
     }
 }

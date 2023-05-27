@@ -61,6 +61,7 @@ To get a local copy up and running follow these steps.
 + HU3: Crear un plato "/dishes", se puede usar como idOwnerRestaurant = 100, idCategory=100, idRestaurant = 100
 + HU4: Editar plato /dishes/{id}, se puede poner de path variable (id del dish) id = 100, idOwnerRestaurant = 100.
 + HU5: Para poder usar los endpoints es necesario utilizar el microservicio de  usuarios para autenticarse como admin o como propietario.
++ HU6: Se agregó un endpoint para verificar el dueño de un restaurante "/restaurants/{id}/validateOwner" es necesario proveer el id del restaurante (puede ser el 100 creado por el script), y es obligatorio proveer un token jwt de Owner o propietario.
 
 <!-- ROADMAP -->
 ## Tests

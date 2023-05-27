@@ -39,7 +39,7 @@ public class TokenValidationSpringAdapter implements ITokenValidationPort {
         try{
             return ((Integer) claimsFromToken.get("idUser")).longValue();
         } catch (Exception e){
-            logger.error(e.getMessage(),e);
+            logger.error(e.getMessage());
             return null;
         }
     }

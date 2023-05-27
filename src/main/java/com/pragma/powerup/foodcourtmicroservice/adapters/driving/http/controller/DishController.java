@@ -34,7 +34,7 @@ public class DishController {
                             content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Map"))),
                     @ApiResponse(responseCode = "400", description = "Malformed request body",
                             content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
-                    @ApiResponse(responseCode = "401", description = "The user provided does not have permission",
+                    @ApiResponse(responseCode = "401", description = "Unauthorized request or the user provided does not have permission",
                             content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
                     @ApiResponse(responseCode = "404", description = "Category or restaurant not found",
                             content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error")))
@@ -52,7 +52,7 @@ public class DishController {
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = DishResponseDto.class))),
                     @ApiResponse(responseCode = "400", description = "Malformed request body",
                             content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
-                    @ApiResponse(responseCode = "401", description = "The user provided does not have permission",
+                    @ApiResponse(responseCode = "401", description = "Unauthorized request or the user provided does not have permission",
                             content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
                     @ApiResponse(responseCode = "404", description = "Dish not found",
                             content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error")))

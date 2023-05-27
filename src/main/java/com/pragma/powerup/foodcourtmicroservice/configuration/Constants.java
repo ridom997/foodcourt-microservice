@@ -12,8 +12,12 @@ public class Constants {
     public static final Long OWNER_ROLE_ID = 3L;
     public static final String RESPONSE_ERROR_MESSAGE_KEY = "error";
     public static final String WRONG_CREDENTIALS_MESSAGE = "Wrong credentials or role not allowed";
+    public static final String RESPONSE_BOOLEAN_RESULT_KEY = "result";
+
+    public static final String RESPONSE_IS_THE_RESTAURANT_OWNER_KEY = "isTheRestaurantOwner";
 
     public static final String USER_PROVIDED_DOES_NOT_HAVE_PERMISSION_MESSAGE = "The user provided does not have permission";
+    public static final String NO_ID_USER_FOUND_IN_TOKEN_JWT_MESSAGE = "Id user not found in jwt token";
     public static final String NO_USER_ROLE_FOUND_MESSAGE = "No user founded with provided id and role";
     public static final String SWAGGER_TITLE_MESSAGE = "Food court API Pragma Power Up";
     public static final String SWAGGER_DESCRIPTION_MESSAGE = "Food court microservice";

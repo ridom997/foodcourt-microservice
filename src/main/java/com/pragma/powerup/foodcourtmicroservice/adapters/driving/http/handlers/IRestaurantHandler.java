@@ -4,4 +4,5 @@ import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.reques
 
 public interface IRestaurantHandler {
     void saveRestaurant(RestaurantRequestDto restaurantRequestDto);
+    Boolean userIsTheRestaurantOwner(Long idRestaurant);
 }

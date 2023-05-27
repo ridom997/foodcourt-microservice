@@ -107,4 +107,11 @@ public class ControllerAdvisor {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY, DISH_NOT_FOUND_MESSAGE));
     }
+
+    @ExceptionHandler(NoIdUserFoundInTokenException.class)
+    public ResponseEntity<Map<String, String>> handleNoIdUserFoundInTokenException(NoIdUserFoundInTokenException noIdUserFoundInTokenException) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY, NO_ID_USER_FOUND_IN_TOKEN_JWT_MESSAGE));
+    }
+
 }

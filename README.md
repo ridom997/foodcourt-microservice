@@ -56,12 +56,28 @@ To get a local copy up and running follow these steps.
 
 <!-- GUIDE -->
 ## GUIDE (SPANISH)
--El usuario insertado corresponde a un propietario con correo: corr@e.o, contraseña= 1234. (dicho usuario tiene id = 100) \
-+ HU2: Crear un nuevo restaurante "/restaurants" Se puede proporcionar como idOwner = 100 que es el usuario previamente insertado con el script data.sql (es necesario tener el microservicio usuarios corriendo).
-+ HU3: Crear un plato "/dishes", se puede usar como idOwnerRestaurant = 100, idCategory=100, idRestaurant = 100
-+ HU4: Editar plato /dishes/{id}, se puede poner de path variable (id del dish) id = 100, idOwnerRestaurant = 100.
-+ HU5: Para poder usar los endpoints es necesario utilizar el microservicio de  usuarios para autenticarse como admin o como propietario.
-+ HU6: Se agregó un endpoint para verificar el dueño de un restaurante "/restaurants/{id}/validateOwner" es necesario proveer el id del restaurante (puede ser el 100 creado por el script), y es obligatorio proveer un token jwt de Owner o propietario.
+
+### HU2:
++ Es necesario ejecutar del data.sql la seccion "-- hu-2"
+  + El usuario insertado corresponde a un propietario con correo: corr@e.o, contraseña= 1234. (dicho usuario tiene id = 100).
++ Crear un nuevo restaurante "/restaurants" Se puede proporcionar como idOwner = 100 que es el usuario previamente insertado con el script data.sql.
++ Para que la petición se cumpla correctamente hay que tener el microservicio user-microservice activo.
++ Desde la Hu-5 se debe estar autenticado como administrador (admin) para usar el endpoint.
+### HU3: 
++ Es necesario ejecutar del data.sql la seccion "-- hu-3".
++ Al hacer el paso anterior ya se tiene habilitada 1 categoria en base de datos (idCategory = 100) y un restaurante (idRestaurant = 100 con idOwnerRestaurant = 100).
++ Crear un plato "/dishes", se pueden usar las variables del paso anterior.
++ Desde la Hu-5 se debe estar autenticado como el propietario (owner) del restaurante para usar el endpoint.
+### HU4: 
++ Es recomendable ejecutar del data.sql la seccion "-- hu-4" para tener ya listo un dish a modificar.
++ Editar plato /dishes/{id}, Si se hizo el paso anterior poner las variables (path variable id del dish > id = 100 y idOwnerRestaurant = 100).
++ Desde la Hu-5 se debe estar autenticado como el propietario (owner) del restaurante para usar el endpoint.
+### HU5: 
++ Para poder usar los endpoints es necesario utilizar el microservicio de usuarios para autenticarse como administrador o como propietario.
+### HU6: 
++ Se agregó un endpoint para verificar el dueño de un restaurante "/restaurants/{id}/validateOwner" es necesario proveer el id del restaurante (puede ser el 100 creado por el script sql). 
++ Se debe estar autenticado como propietario (owner).
++ Este endpoint valida si el idUser (presente en el token jwt) es el dueño del restaurante que llega el path {id} 
 
 <!-- ROADMAP -->
 ## Tests

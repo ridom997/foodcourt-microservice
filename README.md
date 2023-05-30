@@ -78,6 +78,10 @@ To get a local copy up and running follow these steps.
 + Se agregó un endpoint para verificar el dueño de un restaurante "/restaurants/{id}/validateOwner" es necesario proveer el id del restaurante (puede ser el 100 creado por el script sql). 
 + Se debe estar autenticado como propietario (owner).
 + Este endpoint valida si el idUser (presente en el token jwt) es el dueño del restaurante que llega el path {id} 
+### HU7:
++ Editar estado de plato (dish) "/dishes/{id}/status?active=BOOLEAN" reemplazar BOOLEAN por true o false.
++ Es necesario usar el endpoint autenticado como propietario (owner), y que dicho propietario sea el dueño del restaurante al cual se le va actualizar el plato.
++ En caso de tener los datos del data.sql se puede usar como identificador del plato (id = 100).
 
 <!-- ROADMAP -->
 ## Tests

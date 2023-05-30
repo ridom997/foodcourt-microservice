@@ -23,14 +23,20 @@ public class DishHandlerImpl implements IDishHandler {
     private final IDishResponseMapper dishResponseMapper;
 
     @Override
-    public void saveDish(NewDishInfoRequestDto dishInfoRequestDto) {
+    public DishResponseDto saveDish(NewDishInfoRequestDto dishInfoRequestDto) {
         Dish dish = dishRequestMapper.mapToDish(dishInfoRequestDto);
-        dishServicePort.saveDish(new DishAndRestaurantOwnerIdDto(dish,dishInfoRequestDto.getIdOwnerRestaurant()), JwtUtils.getTokenFromRequestHeaders());
+        return dishResponseMapper.toDishResponseDto(dishServicePort.saveDish(new DishAndRestaurantOwnerIdDto(dish,dishInfoRequestDto.getIdOwnerRestaurant()),
+                JwtUtils.getTokenFromRequestHeaders()));
     }
     @Override
     public DishResponseDto editDish(Long idDish, EditDishRequestDto editDishRequestDto) {
         EditDishInfoDto editDishInfoDto = new EditDishInfoDto(editDishRequestDto.getIdOwnerRestaurant(),
                 idDish,editDishRequestDto.getPrice(),editDishRequestDto.getDescription());
         return dishResponseMapper.toDishResponseDto(dishServicePort.editDish(editDishInfoDto,JwtUtils.getTokenFromRequestHeaders()));
+    }
+
+    @Override
+    public DishResponseDto changeStatusDish(Long idDish, Boolean status) {
+        return dishResponseMapper.toDishResponseDto(dishServicePort.changeStatusDish(idDish,status,JwtUtils.getTokenFromRequestHeaders()));
     }
 }

@@ -16,7 +16,6 @@ public class Constants {
 
     public static final String RESPONSE_IS_THE_RESTAURANT_OWNER_KEY = "isTheRestaurantOwner";
 
-    public static final String USER_PROVIDED_DOES_NOT_HAVE_PERMISSION_MESSAGE = "The user provided does not have permission";
     public static final String NO_ID_USER_FOUND_IN_TOKEN_JWT_MESSAGE = "Id user not found in jwt token";
     public static final String NO_USER_ROLE_FOUND_MESSAGE = "No user founded with provided id and role";
     public static final String SWAGGER_TITLE_MESSAGE = "Food court API Pragma Power Up";
@@ -42,6 +41,11 @@ public class Constants {
     public static final String CATEGORY_NOT_FOUND_MESSAGE = "Category not found";
     public static final String DISH_NOT_FOUND_MESSAGE = "Dish not found";
     public static final String ERROR_PARSING_MESSAGE = "Error parsing a request variable";
+
+    public static final String OWNER_ROLE_NAME = "ROLE_OWNER";
+
+    public static final String USER_PROVIDED_DOES_MATCH_WITH_USER_TOKEN_MESSAGE = "User in request doesn't match with user in token";
+    public static final String USER_IS_NOT_THE_RESTAURANT_OWNER_MESSAGE = "User who made the request is not the restaurant owner";
 
 
 }

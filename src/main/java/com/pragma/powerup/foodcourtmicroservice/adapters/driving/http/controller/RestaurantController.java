@@ -32,9 +32,13 @@ public class RestaurantController {
                             content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Map"))),
                     @ApiResponse(responseCode = "404", description = "Owner doesn't exists",
                             content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized request or User with id provided is not authorized",
+                    @ApiResponse(responseCode = "403", description = "User provided does not have permission check message",
+                            content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized request",
                             content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
                     @ApiResponse(responseCode = "400", description = "Required variable is missing",
+                            content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
+                    @ApiResponse(responseCode = "500", description = "Fail communication with user-microservice",
                             content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error")))
             })
     @PostMapping

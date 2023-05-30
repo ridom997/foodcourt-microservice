@@ -16,8 +16,10 @@ public class DishMysqlAdapter implements IDishPersistencePort {
     private final IDishEntityMapper dishEntityMapper;
 
     @Override
-    public void saveDish(Dish dish) {
-        dishEntityRepository.save(dishEntityMapper.toEntity(dish));
+    public Dish saveDish(Dish dish) {
+        DishEntity dishEntity = dishEntityRepository.save(dishEntityMapper.toEntity(dish));
+        dish.setId(dishEntity.getId());
+        return dish;
     }
 
     @Override

@@ -5,6 +5,7 @@ import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.reques
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.DishResponseDto;
 
 public interface IDishHandler {
-    void saveDish(NewDishInfoRequestDto dishInfoRequestDto);
+    DishResponseDto saveDish(NewDishInfoRequestDto dishInfoRequestDto);
     DishResponseDto editDish(Long idDish, EditDishRequestDto editDishRequestDto);
+    DishResponseDto changeStatusDish(Long idDish, Boolean status);
 }

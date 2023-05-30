@@ -50,8 +50,8 @@ public class ControllerAdvisor {
 
     @ExceptionHandler(UserHasNoPermissionException.class)
     public ResponseEntity<Map<String, String>> handleUserHasNoPermission(UserHasNoPermissionException userHasNoPermissionException) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY, USER_PROVIDED_DOES_NOT_HAVE_PERMISSION_MESSAGE));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY, userHasNoPermissionException.getMessage()));
     }
 
     @ExceptionHandler(UserNotFoundFeignException.class)
@@ -112,6 +112,12 @@ public class ControllerAdvisor {
     public ResponseEntity<Map<String, String>> handleNoIdUserFoundInTokenException(NoIdUserFoundInTokenException noIdUserFoundInTokenException) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY, NO_ID_USER_FOUND_IN_TOKEN_JWT_MESSAGE));
+    }
+
+    @ExceptionHandler(NoRoleFoundInTokenException.class)
+    public ResponseEntity<Map<String, String>> handleNoRoleFoundInTokenException(NoRoleFoundInTokenException noRoleFoundInTokenException) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY, noRoleFoundInTokenException.getMessage()));
     }
 
 }

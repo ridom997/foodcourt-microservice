@@ -158,8 +158,8 @@ class RestaurantControllerTest {
     @Test
     void testCreateNewRestaurant_userHasNoPermissionToOwnARestaurantException() throws Exception {
         RestaurantRequestDto restaurantRequestDto = validRestaurantRequestDto();
-        Map<String, String> expectedResponseBody = Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY_EXPECTED, USER_PROVIDED_DOES_NOT_HAVE_PERMISSION_MESSAGE_EXPECTED);
-        doThrow(new UserHasNoPermissionException()).when(mockRestaurantHandler).saveRestaurant(any(RestaurantRequestDto.class));
+        Map<String, String> expectedResponseBody = Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY_EXPECTED, "X MESSAGE");
+        doThrow(new UserHasNoPermissionException("X MESSAGE")).when(mockRestaurantHandler).saveRestaurant(any(RestaurantRequestDto.class));
 
         MockHttpServletResponse response = mockMvc.perform(post("/restaurants")
                         .content(mapToJson(restaurantRequestDto))
@@ -168,7 +168,7 @@ class RestaurantControllerTest {
                 .andReturn().getResponse();
 
         assertAll(
-                () -> assertEquals(HttpStatus.UNAUTHORIZED.value(),response.getStatus()),
+                () -> assertEquals(HttpStatus.FORBIDDEN.value(),response.getStatus()),
                 () -> assertEquals(expectedResponseBody,jsonToMap(response.getContentAsString())),
                 () -> verify(mockRestaurantHandler).saveRestaurant(any(RestaurantRequestDto.class)));
     }

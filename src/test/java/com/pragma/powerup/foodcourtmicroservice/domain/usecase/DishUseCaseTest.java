@@ -4,6 +4,7 @@ import com.pragma.powerup.foodcourtmicroservice.domain.api.ICategoryServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IRestaurantServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.DishAndRestaurantOwnerIdDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.EditDishInfoDto;
+import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.FailValidatingRequiredVariableException;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.NoDishFoundException;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.UserHasNoPermissionException;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Category;
@@ -12,6 +13,7 @@ import com.pragma.powerup.foodcourtmicroservice.domain.model.Restaurant;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.IDishPersistencePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.ITokenValidationPort;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -163,6 +165,50 @@ class DishUseCaseTest {
         assertThrows(NoDishFoundException.class, () -> dishUseCase.findById(idDish));
 
         verify(dishPersistancePort).findById(idDish);
+    }
+
+    @Test
+    void findByIdTest_idNotPresent() {
+        Long idDish = null;
+        assertThrows(FailValidatingRequiredVariableException.class, () -> dishUseCase.findById(idDish));
+    }
+
+    @Test
+    void changeStatusDishTest_isNotRestaurantOwner() {
+        Long idDish = 1L;
+        Boolean status = true;
+        String token = "token";
+
+        when(dishPersistancePort.findById(idDish)).thenReturn(idealDish);
+        when(restaurantServicePort.isTheRestaurantOwner(token, idealDish.getRestaurant()))
+                .thenReturn(false);
+
+        assertThrows(
+                UserHasNoPermissionException.class,
+                () -> {
+                    dishUseCase.changeStatusDish(idDish, status, token);
+                });
+
+        verify(dishPersistancePort, times(0)).saveDish(idealDish);
+    }
+
+    @Test
+    void changeStatusDish_success() {
+        String token = "token";
+        Long idDish = 1L;
+        Boolean status = true;
+        idealDish.setActive(false);
+        when(dishPersistancePort.findById(idDish)).thenReturn(idealDish);
+        when(restaurantServicePort.isTheRestaurantOwner(token, restaurant)).thenReturn(true);
+        when(dishPersistancePort.saveDish(idealDish)).thenReturn(idealDish);
+
+        Dish result = dishUseCase.changeStatusDish(idDish, status, token);
+
+        assertEquals(status, result.getActive());
+
+        verify(dishPersistancePort, times(1)).findById(idDish);
+        verify(restaurantServicePort, times(1)).isTheRestaurantOwner(token, restaurant);
+        verify(dishPersistancePort, times(1)).saveDish(idealDish);
     }
 
 }

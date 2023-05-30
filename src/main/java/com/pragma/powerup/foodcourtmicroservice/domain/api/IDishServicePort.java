@@ -5,7 +5,9 @@ import com.pragma.powerup.foodcourtmicroservice.domain.dto.EditDishInfoDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Dish;
 
 public interface IDishServicePort {
-    void saveDish(DishAndRestaurantOwnerIdDto dishAndRestaurantOwnerIdDto, String token);
+    Dish saveDish(DishAndRestaurantOwnerIdDto dishAndRestaurantOwnerIdDto, String token);
     Dish editDish(EditDishInfoDto editDishInfoDto, String token);
     Dish findById(Long id);
+
+    Dish changeStatusDish(Long idDish, Boolean status, String token);
 }

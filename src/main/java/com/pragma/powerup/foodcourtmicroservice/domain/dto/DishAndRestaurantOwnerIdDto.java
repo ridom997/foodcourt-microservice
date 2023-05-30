@@ -8,7 +8,7 @@ public class DishAndRestaurantOwnerIdDto {
     private Long idOwnerRestaurant;
 
     public DishAndRestaurantOwnerIdDto(Dish dish, Long idOwnerRestaurant) {
-        this.dish = dish;
+        setDish(dish);
         setIdOwnerRestaurant(idOwnerRestaurant);
     }
     public DishAndRestaurantOwnerIdDto() {
@@ -18,6 +18,7 @@ public class DishAndRestaurantOwnerIdDto {
     }
 
     public void setDish(Dish dish) {
+        if (dish == null) throw new FailValidatingRequiredVariableException("Dish is not present");
         this.dish = dish;
     }
 

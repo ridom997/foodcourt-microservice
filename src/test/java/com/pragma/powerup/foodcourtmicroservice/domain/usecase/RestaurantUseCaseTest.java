@@ -13,8 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class RestaurantUseCaseTest {
@@ -64,7 +63,7 @@ class RestaurantUseCaseTest {
     void isTheRestaurantOwnerTest_idUserIsNotPresentInToken() {
         String tokenJwt = "noHayIdUser";
         Long idRestaurant = 1L;
-        when(tokenValidationPort.findIdUserFromToken(tokenJwt)).thenReturn(null);
+        when(tokenValidationPort.findIdUserFromToken(tokenJwt)).thenThrow(NoIdUserFoundInTokenException.class);
 
         assertThrows(
                 NoIdUserFoundInTokenException.class,
@@ -236,5 +235,45 @@ class RestaurantUseCaseTest {
         // Verify the results
         verify(mockUserValidationComunicationPort).userHasRole(1L, Constants.OWNER_ROLE_ID);
         verify(mockRestaurantPersistancePort).saveRestaurant(restaurant);
+    }
+
+    @Test
+    void isTheRestaurantOwner_successfullyVariation() {
+        String tokenJwt = "token";
+        Long idRestaurant = 2L;
+        Long idOwner = 3L;
+        Restaurant restaurant =
+                new Restaurant(
+                        idRestaurant,
+                        "Restaurant Name",
+                        "Address",
+                        idOwner,
+                        "1234567890",
+                        "urlLogo",
+                        "123456789");
+        when(tokenValidationPort.findIdUserFromToken(tokenJwt)).thenReturn(idOwner);
+
+        Boolean result = restaurantUseCaseUnderTest.isTheRestaurantOwner(tokenJwt, restaurant);
+
+        assertTrue(result);
+        verify(tokenValidationPort).findIdUserFromToken(tokenJwt);
+    }
+
+    @Test
+    void isTheRestaurantOwner_tokenNotPresent() {
+        String token = null;
+        Restaurant restaurant = new Restaurant();
+        assertThrows(FailValidatingRequiredVariableException.class, () -> restaurantUseCaseUnderTest.isTheRestaurantOwner(token,restaurant));
+
+        verify(tokenValidationPort, times(0)).findIdUserFromToken(token);
+    }
+
+    @Test
+    void isTheRestaurantOwner_restaurantNotPresent() {
+        String token = "token";
+        Restaurant restaurant = null;
+        assertThrows(FailValidatingRequiredVariableException.class, () -> restaurantUseCaseUnderTest.isTheRestaurantOwner(token,restaurant));
+
+        verify(tokenValidationPort, times(0)).findIdUserFromToken(token);
     }
 }

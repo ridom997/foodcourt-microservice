@@ -86,7 +86,19 @@ class DishControllerTest {
 
     @Test
     void createNewDishTest_created() throws Exception {
-        Map<String, String> expectedResponseBody = Collections.singletonMap(RESPONSE_MESSAGE_KEY_EXPECTED, DISH_CREATED_MESSAGE_EXPECTED);
+        Long idDish = 199L;
+        DishResponseDto expectedResponse = DishResponseDto.builder()
+                .id(idDish)
+                .active(true)
+                .price(1000)
+                .description("Description edited")
+                .idCategory(1L)
+                .idRestaurant(1L)
+                .name("Mexican explosion")
+                .urlImage("image.com")
+                .build();
+        when(dishHandler.saveDish(any(NewDishInfoRequestDto.class))).thenReturn(expectedResponse);
+
         MockHttpServletResponse response = mockMvc.perform(post("/dishes")
                         .content(mapToJson(validNewDishInfoRequest()))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -94,7 +106,7 @@ class DishControllerTest {
                 .andReturn().getResponse();
         assertAll(
                 () -> assertEquals(HttpStatus.CREATED.value(),response.getStatus()),
-                () -> assertEquals(expectedResponseBody,jsonToMap(response.getContentAsString())),
+                () -> assertEquals(mapToJson(expectedResponse),response.getContentAsString()),
                 () -> verify(dishHandler).saveDish(any(NewDishInfoRequestDto.class))
         );
     }
@@ -121,8 +133,8 @@ class DishControllerTest {
 
     @Test
     void createNewDishTest_userHasNoPermissionException() throws Exception {
-        Map<String, String> expectedResponseBody = Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY_EXPECTED, USER_PROVIDED_DOES_NOT_HAVE_PERMISSION_MESSAGE_EXPECTED);
-        doThrow(new UserHasNoPermissionException()).when(dishHandler).saveDish(any(NewDishInfoRequestDto.class));
+        Map<String, String> expectedResponseBody = Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY_EXPECTED, "X MESSAGE");
+        doThrow(new UserHasNoPermissionException("X MESSAGE")).when(dishHandler).saveDish(any(NewDishInfoRequestDto.class));
 
         MockHttpServletResponse response = mockMvc.perform(post("/dishes")
                         .content(mapToJson(validNewDishInfoRequest()))
@@ -131,7 +143,7 @@ class DishControllerTest {
                 .andReturn().getResponse();
 
         assertAll(
-                () -> assertEquals(HttpStatus.UNAUTHORIZED.value(),response.getStatus()),
+                () -> assertEquals(HttpStatus.FORBIDDEN.value(),response.getStatus()),
                 () -> assertEquals(expectedResponseBody,jsonToMap(response.getContentAsString())),
                 () -> verify(dishHandler).saveDish(any(NewDishInfoRequestDto.class)));
     }
@@ -225,8 +237,8 @@ class DishControllerTest {
 
     @Test
     void editDishTest_userHasNoPermissionException() throws Exception {
-        Map<String, String> expectedResponseBody = Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY_EXPECTED, USER_PROVIDED_DOES_NOT_HAVE_PERMISSION_MESSAGE_EXPECTED);
-        doThrow(new UserHasNoPermissionException()).when(dishHandler).editDish(eq(1L),any(EditDishRequestDto.class));
+        Map<String, String> expectedResponseBody = Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY_EXPECTED, "X MESSAGE");
+        doThrow(new UserHasNoPermissionException("X MESSAGE")).when(dishHandler).editDish(eq(1L),any(EditDishRequestDto.class));
         MockHttpServletResponse response = mockMvc.perform(
                         patch("/dishes/{id}", 1)
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -234,7 +246,7 @@ class DishControllerTest {
                 .andReturn()
                 .getResponse();
         assertAll(
-                () -> assertEquals(HttpStatus.UNAUTHORIZED.value(),response.getStatus()),
+                () -> assertEquals(HttpStatus.FORBIDDEN.value(),response.getStatus()),
                 () -> assertEquals(expectedResponseBody,jsonToMap(response.getContentAsString())),
                 () -> verify(dishHandler).editDish(eq(1L),any(EditDishRequestDto.class)));
     }

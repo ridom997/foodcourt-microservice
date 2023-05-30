@@ -29,7 +29,7 @@ public class RestaurantUseCase implements IRestaurantServicePort {
                 throw new NotOnlyNumbersException();
             Boolean userHasRole = userValidationComunicationPort.userHasRole(restaurant.getIdOwner(), Constants.OWNER_ROLE_ID);
             if(userHasRole.equals(false))
-                throw new UserHasNoPermissionException();
+                throw new UserHasNoPermissionException("The user provided in the request is no an owner");
             restaurantPersistancePort.saveRestaurant(restaurant);
     }
 
@@ -47,16 +47,24 @@ public class RestaurantUseCase implements IRestaurantServicePort {
     }
 
     @Override
-    public Boolean isTheRestaurantOwner(String tokenJwt, Long idRestaurant) {
-        if (tokenJwt == null)
-            throw new FailValidatingRequiredVariableException("Token is not present");
+    public Boolean isTheRestaurantOwner(String token, Long idRestaurant) {
         if(idRestaurant == null)
             throw new FailValidatingRequiredVariableException("idRestaurant is not present");
-        Long idUserFromToken = tokenValidationPort.findIdUserFromToken(tokenJwt);
-        if (idUserFromToken == null)
-            throw new NoIdUserFoundInTokenException();
+        if(token == null)
+            throw new FailValidatingRequiredVariableException("Token is not present");
+        Long idUserFromToken = tokenValidationPort.findIdUserFromToken(token);
         Restaurant restaurant = findById(idRestaurant);
         //it isn't necessary check if the restaurant has an owner because if not, the domain model will throw a FailValidatingRequiredVariableException.
+        return restaurant.getIdOwner().equals(idUserFromToken);
+    }
+
+    @Override
+    public Boolean isTheRestaurantOwner(String token, Restaurant restaurant) {
+        if(token ==null)
+            throw new FailValidatingRequiredVariableException("Token is not present");
+        if(restaurant == null)
+            throw new FailValidatingRequiredVariableException("Restaurant is not present");
+        Long idUserFromToken = tokenValidationPort.findIdUserFromToken(token);
         return restaurant.getIdOwner().equals(idUserFromToken);
     }
 

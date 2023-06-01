@@ -82,6 +82,12 @@ To get a local copy up and running follow these steps.
 + Editar estado de plato (dish) "/dishes/{id}/status?active=BOOLEAN" reemplazar BOOLEAN por true o false.
 + Es necesario usar el endpoint autenticado como propietario (owner), y que dicho propietario sea el dueño del restaurante al cual se le va actualizar el plato.
 + En caso de tener los datos del data.sql se puede usar como identificador del plato (id = 100).
+### HU9:
++ Para consumir el endpoint "/restaurants" es necesario estar autenticado como cliente.
++ Es necesario proveer 2 request params
+  + page: numero de la pagina.
+  + size: tamaño de la pagina.
++ En caso de no encontrar una lista de restaurantes ya sea por la configuracion del request param, o por falta de datos en base de datos, la respuesta sera un 404.
 
 <!-- ROADMAP -->
 ## Tests

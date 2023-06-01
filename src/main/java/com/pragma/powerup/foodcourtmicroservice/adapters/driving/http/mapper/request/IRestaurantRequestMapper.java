@@ -1,6 +1,7 @@
 package com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.mapper.request;
 
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.request.RestaurantRequestDto;
+import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.RestaurantResponseDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Restaurant;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
@@ -10,4 +11,5 @@ import org.mapstruct.ReportingPolicy;
         unmappedSourcePolicy = ReportingPolicy.IGNORE)
 public interface IRestaurantRequestMapper {
     Restaurant toRestaurant(RestaurantRequestDto restaurantRequestDto);
+    RestaurantResponseDto toRestaurantResponseDto(Restaurant restaurant);
 }

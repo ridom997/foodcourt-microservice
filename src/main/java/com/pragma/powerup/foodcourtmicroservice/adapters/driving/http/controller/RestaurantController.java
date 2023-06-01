@@ -1,13 +1,16 @@
 package com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.controller;
 
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.request.RestaurantRequestDto;
+import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.RestaurantResponseDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.handlers.IRestaurantHandler;
 import com.pragma.powerup.foodcourtmicroservice.configuration.Constants;
+import com.pragma.powerup.foodcourtmicroservice.configuration.security.RequestParamValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 @RestController()
@@ -64,5 +68,23 @@ public class RestaurantController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(Collections.singletonMap(Constants.RESPONSE_IS_THE_RESTAURANT_OWNER_KEY,
                         restaurantHandler.userIsTheRestaurantOwner(id)));
+    }
+
+    @Operation(summary = "Get paginated restaurants",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "List of Restaurants found (returns a list of objects similar to the example object)",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = RestaurantResponseDto.class))),
+                    @ApiResponse(responseCode = "404", description = "No restaurants found",
+                            content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized request",
+                            content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
+                    @ApiResponse(responseCode = "400", description = "Bad Request (check response message)",
+                            content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error")))
+            })
+    @GetMapping
+    public ResponseEntity<List<RestaurantResponseDto>> findAllRestaurantsPaged(HttpServletRequest httpServletRequest, @RequestParam("page") int page, @RequestParam("size") int size) {
+        RequestParamValidator.validate(httpServletRequest);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(restaurantHandler.findAllPaged(page,size));
     }
 }

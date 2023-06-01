@@ -43,9 +43,13 @@ public class Constants {
     public static final String ERROR_PARSING_MESSAGE = "Error parsing a request variable";
 
     public static final String OWNER_ROLE_NAME = "ROLE_OWNER";
+    public static final String CLIENT_ROLE_NAME = "ROLE_CLIENT";
 
     public static final String USER_PROVIDED_DOES_MATCH_WITH_USER_TOKEN_MESSAGE = "User in request doesn't match with user in token";
     public static final String USER_IS_NOT_THE_RESTAURANT_OWNER_MESSAGE = "User who made the request is not the restaurant owner";
-
-
+    public static final String PAGE_NOT_VALID_MESSAGE = "The Page index is not present or has a negative value";
+    public static final String SIZE_PAGE_NOT_VALID_MESSAGE = "The Page size is not present or is <= 0";
+    public static final String ASC_DIRECTION_VALUE = "ASC";
+    public static final String INCOMPLETE_REQUEST_PARAMS = "Incomplete request params";
+    public static final int VALID_NUMBER_OF_REQUEST_PARAMS_VALUE = 5;
 }

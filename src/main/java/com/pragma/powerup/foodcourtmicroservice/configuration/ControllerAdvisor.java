@@ -2,6 +2,7 @@ package com.pragma.powerup.foodcourtmicroservice.configuration;
 
 import com.pragma.powerup.foodcourtmicroservice.adapters.driven.feign.exceptions.FailConnectionToExternalMicroserviceException;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driven.feign.exceptions.UserNotFoundFeignException;
+import com.pragma.powerup.foodcourtmicroservice.configuration.security.exception.InvalidRequestParamException;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -118,6 +120,23 @@ public class ControllerAdvisor {
     public ResponseEntity<Map<String, String>> handleNoRoleFoundInTokenException(NoRoleFoundInTokenException noRoleFoundInTokenException) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY, noRoleFoundInTokenException.getMessage()));
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<Map<String, String>> handleNoRoleFoundInTokenException(MissingServletRequestParameterException missingServletRequestParameterException) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY, INCOMPLETE_REQUEST_PARAMS));
+    }
+
+    @ExceptionHandler(InvalidRequestParamException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidRequestParamException(InvalidRequestParamException invalidRequestParamException) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY, "There is an invalid request param"));
+    }
+    @ExceptionHandler(NoDataFoundException.class)
+    public ResponseEntity<Map<String, String>> handleNoDataFoundException(NoDataFoundException noDataFoundException) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY, noDataFoundException.getMessage()));
     }
 
 }

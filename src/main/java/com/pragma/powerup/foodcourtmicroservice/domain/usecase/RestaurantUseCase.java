@@ -8,6 +8,10 @@ import com.pragma.powerup.foodcourtmicroservice.domain.spi.IRestaurantPersistenc
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.ITokenValidationPort;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.IUserValidationComunicationPort;
 
+import java.util.List;
+
+import static com.pragma.powerup.foodcourtmicroservice.configuration.Constants.*;
+
 public class RestaurantUseCase implements IRestaurantServicePort {
     private final IRestaurantPersistencePort restaurantPersistancePort;
     private final IUserValidationComunicationPort userValidationComunicationPort;
@@ -66,6 +70,19 @@ public class RestaurantUseCase implements IRestaurantServicePort {
             throw new FailValidatingRequiredVariableException("Restaurant is not present");
         Long idUserFromToken = tokenValidationPort.findIdUserFromToken(token);
         return restaurant.getIdOwner().equals(idUserFromToken);
+    }
+
+    @Override
+    public List<Restaurant> findAllPaged(Integer page, Integer sizePage, String token) {
+        tokenValidationPort.verifyRoleInToken(token,CLIENT_ROLE_NAME);
+        if(page == null || page < 0)
+            throw new FailValidatingRequiredVariableException(PAGE_NOT_VALID_MESSAGE);
+        if(sizePage == null || sizePage <= 0)
+            throw new FailValidatingRequiredVariableException(SIZE_PAGE_NOT_VALID_MESSAGE);
+        List<Restaurant> listRestaurants = restaurantPersistancePort.findAllPaged(page, sizePage, "name", ASC_DIRECTION_VALUE);
+        if(listRestaurants.isEmpty())
+            throw new NoDataFoundException("No restaurants found");
+        return listRestaurants;
     }
 
 

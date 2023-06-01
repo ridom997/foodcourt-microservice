@@ -7,10 +7,14 @@ import com.pragma.powerup.foodcourtmicroservice.domain.spi.IRestaurantPersistenc
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.ITokenValidationPort;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.IUserValidationComunicationPort;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -27,6 +31,8 @@ class RestaurantUseCaseTest {
     private ITokenValidationPort tokenValidationPort;
 
     private RestaurantUseCase restaurantUseCaseUnderTest;
+
+    private String TOKEN_MESSAGE = "token";
 
     @BeforeEach
     void setUp() {
@@ -276,4 +282,77 @@ class RestaurantUseCaseTest {
 
         verify(tokenValidationPort, times(0)).findIdUserFromToken(token);
     }
+
+    @Test
+    @DisplayName("Should throw an exception when the sizePage parameter is null or <= 0")
+    void findAllPagedTest_WhenSizePageIsNull() {
+        assertThrows(
+                FailValidatingRequiredVariableException.class,
+                () -> {
+                    restaurantUseCaseUnderTest.findAllPaged(0, 0,TOKEN_MESSAGE);
+                });
+
+        assertThrows(
+                FailValidatingRequiredVariableException.class,
+                () -> {
+                    restaurantUseCaseUnderTest.findAllPaged(0, -1,TOKEN_MESSAGE);
+                });
+        assertThrows(
+                FailValidatingRequiredVariableException.class,
+                () -> {
+                    restaurantUseCaseUnderTest.findAllPaged(0, null,TOKEN_MESSAGE);
+                });
+    }
+
+    @Test
+    @DisplayName("Should throw an exception when the page parameter is null or negative")
+    void findAllPagedTest_WhenPageIsNullOrNegative() {
+        assertThrows(
+                FailValidatingRequiredVariableException.class,
+                () -> {
+                    restaurantUseCaseUnderTest.findAllPaged(null, 10,TOKEN_MESSAGE);
+                });
+
+        assertThrows(
+                FailValidatingRequiredVariableException.class,
+                () -> {
+                    restaurantUseCaseUnderTest.findAllPaged(-1, 10,TOKEN_MESSAGE);
+                });
+    }
+
+    @Test
+    @DisplayName("Should throw an exception when the list of restaurants is empty")
+    void findAllPagedTest_WhenListIsEmpty() {
+        when(mockRestaurantPersistancePort.findAllPaged(
+                2, 10, "name", "ASC")).thenReturn(new ArrayList<>());
+        assertThrows(
+                NoDataFoundException.class,
+                () -> {
+                    restaurantUseCaseUnderTest.findAllPaged(2, 10,TOKEN_MESSAGE);
+                });
+    }
+    
+    @Test
+    @DisplayName("Should return a list of restaurants")
+    void findAllPagedTest_successfull() {
+        Integer page = 0;
+        Integer sizePage = 10;
+        List<Restaurant> expectedRestaurants = new ArrayList<>();
+        expectedRestaurants.add(
+                new Restaurant(
+                        1L, "Restaurant 1", "Address 1", 1L, "1234567890", "logo1.png", "123456"));
+        expectedRestaurants.add(
+                new Restaurant(
+                        2L, "Restaurant 2", "Address 2", 2L, "0987654321", "logo2.png", "654321"));
+        when(mockRestaurantPersistancePort.findAllPaged(
+                page, sizePage, "name", "ASC")).thenReturn(expectedRestaurants);
+
+        List<Restaurant> actualRestaurants =
+                restaurantUseCaseUnderTest.findAllPaged(page, sizePage,TOKEN_MESSAGE);
+
+        assertEquals(expectedRestaurants, actualRestaurants);
+        verify(mockRestaurantPersistancePort, times(1))
+                .findAllPaged(page, sizePage, "name", "ASC");
+    }
+
 }

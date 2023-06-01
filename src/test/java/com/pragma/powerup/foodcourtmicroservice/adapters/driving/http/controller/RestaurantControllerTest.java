@@ -7,6 +7,7 @@ import com.pragma.powerup.foodcourtmicroservice.adapters.driven.feign.exceptions
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.request.RestaurantRequestDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.handlers.IRestaurantHandler;
 import com.pragma.powerup.foodcourtmicroservice.configuration.ControllerAdvisor;
+import com.pragma.powerup.foodcourtmicroservice.configuration.security.RequestParamValidator;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.UserHasNoPermissionException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,7 +46,6 @@ class RestaurantControllerTest {
 
     @Mock
     private IRestaurantHandler mockRestaurantHandler;
-
     private MockMvc mockMvc;
 
     @BeforeEach

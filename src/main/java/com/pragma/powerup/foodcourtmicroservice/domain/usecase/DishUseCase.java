@@ -5,7 +5,6 @@ import com.pragma.powerup.foodcourtmicroservice.domain.api.IDishServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IRestaurantServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.DishAndRestaurantOwnerIdDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.EditDishInfoDto;
-import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.FailValidatingRequiredVariableException;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.NoDishFoundException;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.UserHasNoPermissionException;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Category;
@@ -13,6 +12,9 @@ import com.pragma.powerup.foodcourtmicroservice.domain.model.Dish;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Restaurant;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.IDishPersistencePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.ITokenValidationPort;
+import com.pragma.powerup.foodcourtmicroservice.domain.validations.ArgumentValidations;
+
+import java.util.List;
 
 import static com.pragma.powerup.foodcourtmicroservice.configuration.Constants.*;
 
@@ -70,8 +72,7 @@ public class DishUseCase implements IDishServicePort {
 
     @Override
     public Dish findById(Long id) {
-        if(id == null)
-            throw new FailValidatingRequiredVariableException("Id of dish is not present");
+        ArgumentValidations.validateObject(id,"Id of dish");
         Dish dish = dishPersistencePort.findById(id);
         if (dish == null)
             throw new NoDishFoundException();

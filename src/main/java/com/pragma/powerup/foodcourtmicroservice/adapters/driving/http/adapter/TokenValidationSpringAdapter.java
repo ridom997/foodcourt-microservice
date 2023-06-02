@@ -1,10 +1,10 @@
 package com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.adapter;
 
 import com.pragma.powerup.foodcourtmicroservice.configuration.security.jwt.JwtProvider;
-import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.FailValidatingRequiredVariableException;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.NoIdUserFoundInTokenException;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.NoRoleFoundInTokenException;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.ITokenValidationPort;
+import com.pragma.powerup.foodcourtmicroservice.domain.validations.ArgumentValidations;
 import io.jsonwebtoken.Claims;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.pragma.powerup.foodcourtmicroservice.configuration.Constants.TOKEN_MESSAGE;
 
 @AllArgsConstructor
 @Component
@@ -35,8 +37,7 @@ public class TokenValidationSpringAdapter implements ITokenValidationPort {
 
     @Override
     public Long findIdUserFromToken(String token) {
-        if (token == null)
-            throw new FailValidatingRequiredVariableException("Token is not present");
+        ArgumentValidations.validateString(token,TOKEN_MESSAGE);
         Long idUserFromToken = getIdUserFromToken(token);
         if (idUserFromToken == null)
             throw new NoIdUserFoundInTokenException();
@@ -45,8 +46,7 @@ public class TokenValidationSpringAdapter implements ITokenValidationPort {
 
     @Override
     public void verifyRoleInToken(String token, String roleName) {
-        if (token == null)
-            throw new FailValidatingRequiredVariableException("Token is not present");
+        ArgumentValidations.validateString(token,TOKEN_MESSAGE);
         List<String> rolesFromToken = getRolesFromToken(token);
         if(rolesFromToken.isEmpty())
             throw new NoRoleFoundInTokenException("Token provided doesn't have roles");

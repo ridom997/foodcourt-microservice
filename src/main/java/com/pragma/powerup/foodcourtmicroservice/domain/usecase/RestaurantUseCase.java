@@ -7,6 +7,8 @@ import com.pragma.powerup.foodcourtmicroservice.domain.model.Restaurant;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.IRestaurantPersistencePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.ITokenValidationPort;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.IUserValidationComunicationPort;
+import com.pragma.powerup.foodcourtmicroservice.domain.validations.PaginationValidations;
+import com.pragma.powerup.foodcourtmicroservice.domain.validations.ArgumentValidations;
 
 import java.util.List;
 
@@ -52,10 +54,8 @@ public class RestaurantUseCase implements IRestaurantServicePort {
 
     @Override
     public Boolean isTheRestaurantOwner(String token, Long idRestaurant) {
-        if(idRestaurant == null)
-            throw new FailValidatingRequiredVariableException("idRestaurant is not present");
-        if(token == null)
-            throw new FailValidatingRequiredVariableException("Token is not present");
+        ArgumentValidations.validateObject(idRestaurant,"idRestaurant");
+        ArgumentValidations.validateString(token,TOKEN_MESSAGE);
         Long idUserFromToken = tokenValidationPort.findIdUserFromToken(token);
         Restaurant restaurant = findById(idRestaurant);
         //it isn't necessary check if the restaurant has an owner because if not, the domain model will throw a FailValidatingRequiredVariableException.
@@ -64,10 +64,8 @@ public class RestaurantUseCase implements IRestaurantServicePort {
 
     @Override
     public Boolean isTheRestaurantOwner(String token, Restaurant restaurant) {
-        if(token ==null)
-            throw new FailValidatingRequiredVariableException("Token is not present");
-        if(restaurant == null)
-            throw new FailValidatingRequiredVariableException("Restaurant is not present");
+        ArgumentValidations.validateString(token,TOKEN_MESSAGE);
+        ArgumentValidations.validateObject(restaurant,"Restaurant");
         Long idUserFromToken = tokenValidationPort.findIdUserFromToken(token);
         return restaurant.getIdOwner().equals(idUserFromToken);
     }
@@ -75,10 +73,7 @@ public class RestaurantUseCase implements IRestaurantServicePort {
     @Override
     public List<Restaurant> findAllPaged(Integer page, Integer sizePage, String token) {
         tokenValidationPort.verifyRoleInToken(token,CLIENT_ROLE_NAME);
-        if(page == null || page < 0)
-            throw new FailValidatingRequiredVariableException(PAGE_NOT_VALID_MESSAGE);
-        if(sizePage == null || sizePage <= 0)
-            throw new FailValidatingRequiredVariableException(SIZE_PAGE_NOT_VALID_MESSAGE);
+        PaginationValidations.validatePageAndSizePage(page,sizePage);
         List<Restaurant> listRestaurants = restaurantPersistancePort.findAllPaged(page, sizePage, "name", ASC_DIRECTION_VALUE);
         if(listRestaurants.isEmpty())
             throw new NoDataFoundException("No restaurants found");

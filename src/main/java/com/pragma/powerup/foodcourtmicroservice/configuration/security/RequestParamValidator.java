@@ -21,7 +21,7 @@ public class RequestParamValidator {
         if(existAnyUnsupportedRequestParam)
             throw new InvalidRequestParamException();
 
-        //verify is there is a non unique param request
+        //verify is there is a non unique request param
         requestParamNamesList.stream().forEach(param -> {
             String[] values = request.getParameterValues(param);
             if (values.length > 1)

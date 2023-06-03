@@ -1,7 +1,9 @@
 package com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.controller;
 
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.request.RestaurantRequestDto;
+import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.DishResponseDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.RestaurantResponseDto;
+import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.handlers.IDishHandler;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.handlers.IRestaurantHandler;
 import com.pragma.powerup.foodcourtmicroservice.configuration.Constants;
 import com.pragma.powerup.foodcourtmicroservice.configuration.security.RequestParamValidator;
@@ -29,6 +31,7 @@ import java.util.Map;
 public class RestaurantController {
 
     private final IRestaurantHandler restaurantHandler;
+    private final IDishHandler dishHandler;
 
     @Operation(summary = "Add a new restaurant",
             responses = {
@@ -86,5 +89,29 @@ public class RestaurantController {
         RequestParamValidator.validate(httpServletRequest);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(restaurantHandler.findAllPaged(page,size));
+    }
+
+    @Operation(summary = "List Dishes of restaurant",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "List of dishes found (returns a list of objects similar to the example object)",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = DishResponseDto.class))),
+                    @ApiResponse(responseCode = "400", description = "Bad Request (check response message)",
+                            content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized request",
+                            content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
+                    @ApiResponse(responseCode = "404", description = "No data found (restaurant or category or list of dishes)",
+                            content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error")))
+            })
+    @GetMapping(value = "/{idRestaurant}/dishes")
+    public ResponseEntity<List<DishResponseDto>> findAllDishesByRestaurantAndCategory(
+            HttpServletRequest httpServletRequest,
+            @PathVariable Long idRestaurant,
+            @RequestParam(required = false) Long idCategory,
+            @RequestParam int page,
+            @RequestParam int size
+    ) {
+        RequestParamValidator.validate(httpServletRequest);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(dishHandler.getPagedDishesByRestaurantAndOptionalCategory(page,size,idRestaurant,idCategory));
     }
 }

@@ -35,7 +35,7 @@ public class MainSecurity {
                         .requestMatchers( "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/actuator/health").permitAll()
                         .requestMatchers(HttpMethod.POST,"/restaurants").hasRole("ADMIN")
                         .requestMatchers("/dishes" , "/dishes/{id}", "/restaurants/{id}/validateOwner", "/dishes/{id}/status").hasRole("OWNER")
-                        .requestMatchers(HttpMethod.GET,"/restaurants").hasRole("CLIENT")
+                        .requestMatchers(HttpMethod.GET,"/restaurants","/restaurants/{idRestaurant}/dishes").hasRole("CLIENT")
                         .anyRequest().authenticated()
                 )
                 .formLogin().disable()

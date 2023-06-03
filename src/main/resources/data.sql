@@ -12,3 +12,10 @@ INSERT INTO powerup.restaurant (id,address, id_owner, name, nit, phone, url_logo
 -- HU -- 4
 -- Add this dish so we can edit it using the endpoint "/dishes/{id}" (id = 100), in the request body: idOwnerRestaurant = 100)
 INSERT INTO powerup.dish (id, active, description, name, price, url_image, id_category, id_restaurant) VALUES(100, 1, 'Arroz, frijoles y carne', 'Tipico mexicano 1', 11500, 'https://cdn0.recetasgratis.net/es/posts/1/4/0/arroz_con_carne_molida_74041_600.webp', 100, 100);
+
+--HU --10
+INSERT INTO category (id, description, name) VALUES(101, 'Colombian Food', 'Colombian');
+INSERT INTO category (id, description, name) VALUES(102, 'Italian Food', 'Italian');
+INSERT INTO category (id, description, name) VALUES(103, 'Fishes and sea food.', 'Fishes');
+INSERT INTO powerup.dish (active,description,name,price,url_image,id_category,id_restaurant) VALUES
+	 (1,'Chicharron, frisoles, arroz y platano.','Bandeja paisa',32000,'https://cdn.colombia.com/gastronomia/2011/08/02/bandeja-paisa-1616.gif',101,100);

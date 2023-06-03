@@ -14,6 +14,9 @@ import com.pragma.powerup.foodcourtmicroservice.domain.model.Dish;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
+
 @AllArgsConstructor
 @Service
 public class DishHandlerImpl implements IDishHandler {
@@ -38,5 +41,13 @@ public class DishHandlerImpl implements IDishHandler {
     @Override
     public DishResponseDto changeStatusDish(Long idDish, Boolean status) {
         return dishResponseMapper.toDishResponseDto(dishServicePort.changeStatusDish(idDish,status,JwtUtils.getTokenFromRequestHeaders()));
+    }
+
+    @Override
+    public List<DishResponseDto> getPagedDishesByRestaurantAndOptionalCategory(Integer page, Integer sizePage, Long idRestaurant, Long idCategory) {
+        List<Dish> listDishes = dishServicePort.getPagedDishesByRestaurantAndOptionalCategory(idRestaurant, page, sizePage, Optional.ofNullable(idCategory), JwtUtils.getTokenFromRequestHeaders());
+        return listDishes.stream()
+                .map(dishResponseMapper::toDishResponseDto)
+                .toList();
     }
 }

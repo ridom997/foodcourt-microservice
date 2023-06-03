@@ -5,6 +5,7 @@ import com.pragma.powerup.foodcourtmicroservice.domain.api.IRestaurantServicePor
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.DishAndRestaurantOwnerIdDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.EditDishInfoDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.FailValidatingRequiredVariableException;
+import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.NoDataFoundException;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.NoDishFoundException;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.UserHasNoPermissionException;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Category;
@@ -19,6 +20,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -209,6 +214,99 @@ class DishUseCaseTest {
         verify(dishPersistancePort, times(1)).findById(idDish);
         verify(restaurantServicePort, times(1)).isTheRestaurantOwner(token, restaurant);
         verify(dishPersistancePort, times(1)).saveDish(idealDish);
+    }
+
+
+
+
+
+    @Test
+    @DisplayName("Should throw an exception when no dishes are found")
+    void getPagedDishesByRestaurantAndOptionalCategoryTest_NoDishesFoundThenThrowException() {
+        Long idRestaurant = 1L;
+        Integer page = 0;
+        Integer sizePage = 10;
+        Optional<Long> idCategory = Optional.of(1L);
+        String token = "token";
+        when(restaurantServicePort.findById(idRestaurant)).thenReturn(restaurant);
+        when(categoryServicePort.findById(idCategory.get())).thenReturn(category);
+        when(dishPersistancePort.getDishesByRestaurantAndCategory(
+                page, sizePage, restaurant.getId(), category.getId()))
+                .thenReturn(new ArrayList<>());
+
+
+        assertThrows(
+                NoDataFoundException.class,
+                () -> {
+                    dishUseCase.getPagedDishesByRestaurantAndOptionalCategory(
+                            idRestaurant, page, sizePage, idCategory, token);
+                });
+
+
+        verify(tokenValidationPort, times(1)).verifyRoleInToken(token, "ROLE_CLIENT");
+        verify(restaurantServicePort, times(1)).findById(idRestaurant);
+        verify(categoryServicePort, times(1)).findById(idCategory.get());
+        verify(dishPersistancePort, times(1))
+                .getDishesByRestaurantAndCategory(
+                        page, sizePage, restaurant.getId(), category.getId());
+    }
+
+    @Test
+    @DisplayName("Should return paged dishes by restaurant and category when both are provided")
+    void getPagedDishesByRestaurantAndCategory_success() {
+        Long idRestaurant = 1L;
+        Integer page = 0;
+        Integer sizePage = 10;
+        Optional<Long> idCategory = Optional.of(1L);
+        String token = "token";
+
+        List<Dish> dishes = new ArrayList<>();
+        dishes.add(idealDish);
+
+        when(restaurantServicePort.findById(idRestaurant)).thenReturn(restaurant);
+        when(categoryServicePort.findById(idCategory.get())).thenReturn(category);
+        when(dishPersistancePort.getDishesByRestaurantAndCategory(
+                page, sizePage, restaurant.getId(), category.getId()))
+                .thenReturn(dishes);
+
+        List<Dish> result =
+                dishUseCase.getPagedDishesByRestaurantAndOptionalCategory(
+                        idRestaurant, page, sizePage, idCategory, token);
+
+        assertEquals(dishes, result);
+        verify(tokenValidationPort, times(1)).verifyRoleInToken(token, "ROLE_CLIENT");
+        verify(restaurantServicePort, times(1)).findById(idRestaurant);
+        verify(categoryServicePort, times(1)).findById(idCategory.get());
+        verify(dishPersistancePort, times(1))
+                .getDishesByRestaurantAndCategory(
+                        page, sizePage, restaurant.getId(), category.getId());
+    }
+
+    @Test
+    @DisplayName("Should return paged dishes by restaurant when category is not provided")
+    void getPagedDishesByRestaurant_success() {
+        Long idRestaurant = 1L;
+        Integer page = 0;
+        Integer sizePage = 10;
+        Optional<Long> idCategory = Optional.empty();
+        String token = "token";
+        List<Dish> dishes = new ArrayList<>();
+        dishes.add(idealDish);
+
+        when(restaurantServicePort.findById(idRestaurant)).thenReturn(restaurant);
+        when(dishPersistancePort.getDishesByRestaurantAndCategory(
+                page, sizePage, restaurant.getId(), null))
+                .thenReturn(dishes);
+
+        List<Dish> result =
+                dishUseCase.getPagedDishesByRestaurantAndOptionalCategory(
+                        idRestaurant, page, sizePage, idCategory, token);
+
+        assertEquals(dishes, result);
+        verify(tokenValidationPort, times(1)).verifyRoleInToken(token, "ROLE_CLIENT");
+        verify(restaurantServicePort, times(1)).findById(idRestaurant);
+        verify(dishPersistancePort, times(1))
+                .getDishesByRestaurantAndCategory(page, sizePage, restaurant.getId(), null);
     }
 
 }

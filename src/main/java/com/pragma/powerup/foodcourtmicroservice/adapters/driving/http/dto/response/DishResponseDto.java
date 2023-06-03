@@ -13,8 +13,7 @@ public class DishResponseDto {
     private Long id;
     @Schema(example = "Plato ejecutivo 1")
     private String name;
-    @Schema(example = "1")
-    private Long idCategory;
+    private CategoryResponseDto category;
     @Schema(example = "Frijoles, arroz y carne molida")
     private String description;
     @Schema(example = "13000")

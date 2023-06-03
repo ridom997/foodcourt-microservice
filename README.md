@@ -56,7 +56,7 @@ To get a local copy up and running follow these steps.
 
 <!-- GUIDE -->
 ## GUIDE (SPANISH)
-
+En caso de usar un endpoint sin la autorización necesaria saldrá de respuesta "Wrong credentials or role not allowed".
 ### HU2:
 + Es necesario ejecutar del data.sql la seccion "-- hu-2"
   + El usuario insertado corresponde a un propietario con correo: corr@e.o, contraseña= 1234. (dicho usuario tiene id = 100).
@@ -85,10 +85,16 @@ To get a local copy up and running follow these steps.
 ### HU9:
 + Para consumir el endpoint "/restaurants" es necesario estar autenticado como cliente.
 + Es necesario proveer 2 request params
-  + page: numero de la pagina.
-  + size: tamaño de la pagina.
+  + page: numero de la pagina. (empieza desde 0)
+  + size: tamaño de la pagina. (mayor a 0)
 + En caso de no encontrar una lista de restaurantes ya sea por la configuracion del request param, o por falta de datos en base de datos, la respuesta sera un 404.
-
+### HU10:
++ Es necesario ejecutar del data.sql la seccion "-- HU-10". para agregar más categorias y un plato al restaurante con id 100.
++ Para consumir el endpoint "/restaurants/{idRestaurant}/dishes" es necesario estar autenticado como cliente y reemplazar {idRestaurant) por el id del restaurante.
++ Es necesario proveer 2 request params
+    + page: numero de la pagina. (empieza desde 0)
+    + size: tamaño de la pagina. (mayor a 0)
++ El request param "idCategory" es opcional e indica el id de la categoria por el cual se va a filtrar la lista de platos (dishes)
 <!-- ROADMAP -->
 ## Tests
 

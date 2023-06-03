@@ -5,7 +5,7 @@ import com.pragma.powerup.foodcourtmicroservice.domain.api.IDishServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IRestaurantServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.DishAndRestaurantOwnerIdDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.EditDishInfoDto;
-import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.FailValidatingRequiredVariableException;
+import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.NoDataFoundException;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.NoDishFoundException;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.UserHasNoPermissionException;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Category;
@@ -13,6 +13,11 @@ import com.pragma.powerup.foodcourtmicroservice.domain.model.Dish;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Restaurant;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.IDishPersistencePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.ITokenValidationPort;
+import com.pragma.powerup.foodcourtmicroservice.domain.validations.ArgumentValidations;
+import com.pragma.powerup.foodcourtmicroservice.domain.validations.PaginationValidations;
+
+import java.util.List;
+import java.util.Optional;
 
 import static com.pragma.powerup.foodcourtmicroservice.configuration.Constants.*;
 
@@ -70,8 +75,7 @@ public class DishUseCase implements IDishServicePort {
 
     @Override
     public Dish findById(Long id) {
-        if(id == null)
-            throw new FailValidatingRequiredVariableException("Id of dish is not present");
+        ArgumentValidations.validateObject(id,"Id of dish");
         Dish dish = dishPersistencePort.findById(id);
         if (dish == null)
             throw new NoDishFoundException();
@@ -89,5 +93,18 @@ public class DishUseCase implements IDishServicePort {
         return dishPersistencePort.saveDish(dish);
     }
 
-
+    @Override
+    public List<Dish> getPagedDishesByRestaurantAndOptionalCategory(Long idRestaurant, Integer page, Integer sizePage, Optional<Long> idCategory, String token) {
+        tokenValidationPort.verifyRoleInToken(token,CLIENT_ROLE_NAME);
+        PaginationValidations.validatePageAndSizePage(page,sizePage);
+        Restaurant restaurant = restaurantServicePort.findById(idRestaurant);
+        Category category = null;
+        if (idCategory.isPresent())
+             category = categoryServicePort.findById(idCategory.get());
+        List<Dish> dishesByRestaurantAndCategory = dishPersistencePort.getDishesByRestaurantAndCategory(page, sizePage, restaurant.getId(),
+                category != null ? category.getId() : null);
+        if(dishesByRestaurantAndCategory.isEmpty())
+            throw new NoDataFoundException("No dishes found");
+        return dishesByRestaurantAndCategory;
+    }
 }

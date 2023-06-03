@@ -3,6 +3,7 @@ package com.pragma.powerup.foodcourtmicroservice.configuration;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driven.feign.exceptions.FailConnectionToExternalMicroserviceException;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driven.feign.exceptions.UserNotFoundFeignException;
 import com.pragma.powerup.foodcourtmicroservice.configuration.security.exception.InvalidRequestParamException;
+import com.pragma.powerup.foodcourtmicroservice.configuration.security.exception.NonUniqueRequestParamException;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -137,6 +138,12 @@ public class ControllerAdvisor {
     public ResponseEntity<Map<String, String>> handleNoDataFoundException(NoDataFoundException noDataFoundException) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY, noDataFoundException.getMessage()));
+    }
+
+    @ExceptionHandler(NonUniqueRequestParamException.class)
+    public ResponseEntity<Map<String, String>> handleNonUniqueRequestParamException(NonUniqueRequestParamException nonUniqueRequestParamException) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY, nonUniqueRequestParamException.getMessage()));
     }
 
 }

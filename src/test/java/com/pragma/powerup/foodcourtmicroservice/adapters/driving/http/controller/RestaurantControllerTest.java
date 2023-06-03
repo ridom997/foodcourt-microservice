@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driven.feign.exceptions.FailConnectionToExternalMicroserviceException;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driven.feign.exceptions.UserNotFoundFeignException;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.request.RestaurantRequestDto;
+import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.handlers.IDishHandler;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.handlers.IRestaurantHandler;
 import com.pragma.powerup.foodcourtmicroservice.configuration.ControllerAdvisor;
 import com.pragma.powerup.foodcourtmicroservice.configuration.security.RequestParamValidator;
@@ -46,11 +47,14 @@ class RestaurantControllerTest {
 
     @Mock
     private IRestaurantHandler mockRestaurantHandler;
+
+    @Mock
+    private IDishHandler dishHandler;
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-        restaurantController = new RestaurantController(mockRestaurantHandler);
+        restaurantController = new RestaurantController(mockRestaurantHandler,dishHandler);
         mockMvc = MockMvcBuilders.standaloneSetup(restaurantController).setControllerAdvice(new ControllerAdvisor()).build();
     }
 

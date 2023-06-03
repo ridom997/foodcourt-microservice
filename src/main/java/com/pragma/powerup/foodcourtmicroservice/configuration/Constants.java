@@ -51,5 +51,6 @@ public class Constants {
     public static final String SIZE_PAGE_NOT_VALID_MESSAGE = "The Page size is not present or is <= 0";
     public static final String ASC_DIRECTION_VALUE = "ASC";
     public static final String INCOMPLETE_REQUEST_PARAMS = "Incomplete request params";
-    public static final int VALID_NUMBER_OF_REQUEST_PARAMS_VALUE = 5;
+    public static final String NOT_PRESENT_MESSAGE = " is not present";
+    public static final String TOKEN_MESSAGE = "Token";
 }

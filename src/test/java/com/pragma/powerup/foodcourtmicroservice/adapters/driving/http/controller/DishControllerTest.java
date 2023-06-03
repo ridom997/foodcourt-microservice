@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.request.EditDishRequestDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.request.NewDishInfoRequestDto;
+import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.CategoryResponseDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.DishResponseDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.handlers.IDishHandler;
 import com.pragma.powerup.foodcourtmicroservice.configuration.ControllerAdvisor;
@@ -92,7 +93,7 @@ class DishControllerTest {
                 .active(true)
                 .price(1000)
                 .description("Description edited")
-                .idCategory(1L)
+                .category(new CategoryResponseDto(2L,"Mexican food"))
                 .idRestaurant(1L)
                 .name("Mexican explosion")
                 .urlImage("image.com")
@@ -190,7 +191,7 @@ class DishControllerTest {
                 .active(true)
                 .price(1000)
                 .description("Description edited")
-                .idCategory(1L)
+                .category(new CategoryResponseDto(2L,"Mexican food"))
                 .idRestaurant(1L)
                 .name("Mexican explosion")
                 .urlImage("image.com")
@@ -212,7 +213,7 @@ class DishControllerTest {
                 () -> assertEquals(expectedResponse.getDescription(), responseDto.getDescription()),
                 () -> assertEquals(expectedResponse.getUrlImage(), responseDto.getUrlImage()),
                 () -> assertEquals(expectedResponse.getPrice(), responseDto.getPrice()),
-                () -> assertEquals(expectedResponse.getIdCategory(), responseDto.getIdCategory()),
+                () -> assertEquals(expectedResponse.getCategory().getId(), responseDto.getCategory().getId()),
                 () -> assertEquals(expectedResponse.getIdRestaurant(), responseDto.getIdRestaurant()),
                 () -> assertEquals(expectedResponse.getActive(), responseDto.getActive()),
                 () -> verify(dishHandler).editDish(eq(idDish),any(EditDishRequestDto.class))

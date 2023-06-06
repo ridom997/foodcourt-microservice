@@ -53,4 +53,15 @@ public class Constants {
     public static final String INCOMPLETE_REQUEST_PARAMS = "Incomplete request params";
     public static final String NOT_PRESENT_MESSAGE = " is not present";
     public static final String TOKEN_MESSAGE = "Token";
+
+    public static final String USER_IS_NOT_THE_CLIENT_OF_THE_REQUEST_MESSAGE = "User who made the request is not the same of the order";
+    public static final Integer PENDING_ORDER_STATUS_INT_VALUE = 1;
+    public static final Integer IN_PROGRESS_ORDER_STATUS_INT_VALUE = 2;
+    public static final Integer READY_ORDER_STATUS_INT_VALUE = 3;
+    public static final Integer DELIVERED_ORDER_STATUS_INT_VALUE = 4;
+
+    public static final String PENDING_ORDER_STATUS_VALUE = "PENDING";
+    public static final String IN_PROGRESS_ORDER_STATUS_VALUE = "IN PROGRESS";
+    public static final String READY_ORDER_STATUS_VALUE = "READY";
+    public static final String DELIVERED_ORDER_STATUS_VALUE = "DELIVERED";
 }

@@ -1,27 +1,14 @@
 package com.pragma.powerup.foodcourtmicroservice.configuration;
 
 import com.pragma.powerup.foodcourtmicroservice.adapters.driven.feign.adapter.UserValidationFeignAdapter;
-import com.pragma.powerup.foodcourtmicroservice.adapters.driven.jpa.mysql.adapter.CategoryMysqlAdapter;
-import com.pragma.powerup.foodcourtmicroservice.adapters.driven.jpa.mysql.adapter.DishMysqlAdapter;
-import com.pragma.powerup.foodcourtmicroservice.adapters.driven.jpa.mysql.adapter.RestaurantMysqlAdapter;
-import com.pragma.powerup.foodcourtmicroservice.adapters.driven.jpa.mysql.mappers.ICategoryEntityMapper;
-import com.pragma.powerup.foodcourtmicroservice.adapters.driven.jpa.mysql.mappers.IDishEntityMapper;
-import com.pragma.powerup.foodcourtmicroservice.adapters.driven.jpa.mysql.mappers.IRestaurantEntityMapper;
-import com.pragma.powerup.foodcourtmicroservice.adapters.driven.jpa.mysql.repositories.ICategoryEntityRepository;
-import com.pragma.powerup.foodcourtmicroservice.adapters.driven.jpa.mysql.repositories.IDishEntityRepository;
-import com.pragma.powerup.foodcourtmicroservice.adapters.driven.jpa.mysql.repositories.IRestaurantEntityRepository;
+import com.pragma.powerup.foodcourtmicroservice.adapters.driven.jpa.mysql.adapter.*;
+import com.pragma.powerup.foodcourtmicroservice.adapters.driven.jpa.mysql.mappers.*;
+import com.pragma.powerup.foodcourtmicroservice.adapters.driven.jpa.mysql.repositories.*;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.adapter.TokenValidationSpringAdapter;
 import com.pragma.powerup.foodcourtmicroservice.configuration.security.jwt.JwtProvider;
-import com.pragma.powerup.foodcourtmicroservice.domain.api.ICategoryServicePort;
-import com.pragma.powerup.foodcourtmicroservice.domain.api.IDishServicePort;
-import com.pragma.powerup.foodcourtmicroservice.domain.api.IRestaurantServicePort;
-import com.pragma.powerup.foodcourtmicroservice.domain.spi.ICategoryPersistencePort;
-import com.pragma.powerup.foodcourtmicroservice.domain.spi.IDishPersistencePort;
-import com.pragma.powerup.foodcourtmicroservice.domain.spi.IRestaurantPersistencePort;
-import com.pragma.powerup.foodcourtmicroservice.domain.spi.ITokenValidationPort;
-import com.pragma.powerup.foodcourtmicroservice.domain.usecase.CategoryUseCase;
-import com.pragma.powerup.foodcourtmicroservice.domain.usecase.DishUseCase;
-import com.pragma.powerup.foodcourtmicroservice.domain.usecase.RestaurantUseCase;
+import com.pragma.powerup.foodcourtmicroservice.domain.api.*;
+import com.pragma.powerup.foodcourtmicroservice.domain.spi.*;
+import com.pragma.powerup.foodcourtmicroservice.domain.usecase.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,6 +29,13 @@ public class BeanConfiguration {
     private final ICategoryEntityRepository categoryEntityRepository;
 
     private final JwtProvider jwtProvider;
+
+    private final IOrderDishEntityMapper orderDishEntityMapper;
+    private final IOrderDishEntityRepository orderDishEntityRepository;
+
+    private final IOrderEntityMapper orderEntityMapper;
+    private final IOrderEntityRepository orderEntityRepository;
+
 
     @Bean
     public IRestaurantPersistencePort restaurantPersistancePort(){
@@ -75,5 +69,27 @@ public class BeanConfiguration {
     @Bean
     public IDishServicePort dishServicePort(){
         return new DishUseCase(dishPersistancePort(),categoryServicePort(),restaurantServicePort(), tokenValidationPort());
+    }
+
+    @Bean
+    public IOrderDishPersistencePort orderDishPersistencePort(){
+        return new OrderDishMysqlAdapter(orderDishEntityRepository,orderDishEntityMapper);
+    }
+    @Bean
+    public IOrderPersistencePort orderPersistencePort(){
+        return new OrderMysqlAdapter(orderEntityRepository,orderEntityMapper);
+    }
+
+    @Bean
+    public IOrderDishServicePort orderDishServicePort(){
+        return new OrderDishUseCase(orderDishPersistencePort());
+    }
+    @Bean
+    public IOrderServicePort orderServicePort(){
+        return new OrderUseCase(orderPersistencePort(),
+                tokenValidationPort(),
+                dishServicePort(),
+                restaurantServicePort(),
+                orderDishServicePort());
     }
 }

@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -24,7 +24,7 @@ public class OrderEntity {
     private Long idClient;
 
     @Column(name = "date")
-    private LocalDate date;
+    private LocalDateTime date;
 
     @Column(name = "status")
     private Integer status;
@@ -41,4 +41,10 @@ public class OrderEntity {
     @OneToMany(mappedBy = "idOrder")
     private Set<OrderDishEntity> orderDishEntities = new LinkedHashSet<>();
 
+    public OrderEntity() {
+    }
+
+    public OrderEntity(Long id) {
+        this.id = id;
+    }
 }

@@ -95,6 +95,11 @@ En caso de usar un endpoint sin la autorización necesaria saldrá de respuesta 
     + page: numero de la pagina. (empieza desde 0)
     + size: tamaño de la pagina. (mayor a 0)
 + El request param "idCategory" es opcional e indica el id de la categoria por el cual se va a filtrar la lista de platos (dishes)
+### HU11:
++ Es necesario ejecutar del data.sql la sección "-- HU --11"
++ Para consumir el endpoint "/orders" es necesario estar autenticado como cliente.
++ El cliente puede crear una orden en X restaurante solo si no tiene una orden en dicho restaurante en estado activo (estados activos: 1,2 ó 3)
++ En caso de que en la variable dishes del request, vengan repetido un mismo idDish, las cantidades del mismo seran sumadas.
 <!-- ROADMAP -->
 ## Tests
 

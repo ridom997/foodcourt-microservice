@@ -146,4 +146,10 @@ public class ControllerAdvisor {
                 .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY, nonUniqueRequestParamException.getMessage()));
     }
 
+    @ExceptionHandler(ClientAlreadyHasAnActiveOrderException.class)
+    public ResponseEntity<Map<String, String>> handleClientAlreadyHasAnActiveOrderException(ClientAlreadyHasAnActiveOrderException clientAlreadyHasAnActiveOrderException) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY, "Client has an active order in the selected restaurant."));
+    }
+
 }

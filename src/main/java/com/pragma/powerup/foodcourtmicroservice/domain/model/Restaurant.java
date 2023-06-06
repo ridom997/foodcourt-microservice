@@ -18,6 +18,11 @@ public class Restaurant {
         this.id = id;
     }
 
+    public Restaurant(Long id, String name) {
+        this.name = name;
+        this.id = id;
+    }
+
     public Restaurant(Long id, String name, String address, Long idOwner, String phone, String urlLogo, String nit) {
         this.id = id;
         setName(name);

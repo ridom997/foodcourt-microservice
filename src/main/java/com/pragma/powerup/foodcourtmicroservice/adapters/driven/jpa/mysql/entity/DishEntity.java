@@ -50,4 +50,10 @@ public class DishEntity {
     @OneToMany(mappedBy = "idDish")
     private Set<OrderDishEntity> orderDishEntities = new LinkedHashSet<>();
 
+    public DishEntity() {
+    }
+
+    public DishEntity(Long id) {
+        this.id = id;
+    }
 }

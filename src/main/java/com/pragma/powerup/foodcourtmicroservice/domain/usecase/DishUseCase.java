@@ -3,8 +3,11 @@ package com.pragma.powerup.foodcourtmicroservice.domain.usecase;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.ICategoryServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IDishServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IRestaurantServicePort;
+import com.pragma.powerup.foodcourtmicroservice.domain.dto.DishAndAmountDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.DishAndRestaurantOwnerIdDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.EditDishInfoDto;
+import com.pragma.powerup.foodcourtmicroservice.domain.dto.IdDishAndAmountDto;
+import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.FailValidatingRequiredVariableException;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.NoDataFoundException;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.NoDishFoundException;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.UserHasNoPermissionException;
@@ -16,8 +19,10 @@ import com.pragma.powerup.foodcourtmicroservice.domain.spi.ITokenValidationPort;
 import com.pragma.powerup.foodcourtmicroservice.domain.validations.ArgumentValidations;
 import com.pragma.powerup.foodcourtmicroservice.domain.validations.PaginationValidations;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.pragma.powerup.foodcourtmicroservice.configuration.Constants.*;
 
@@ -106,5 +111,30 @@ public class DishUseCase implements IDishServicePort {
         if(dishesByRestaurantAndCategory.isEmpty())
             throw new NoDataFoundException("No dishes found");
         return dishesByRestaurantAndCategory;
+    }
+
+    @Override
+    public List<DishAndAmountDto> generateValidatedDishList(Long idRestaurant, List<IdDishAndAmountDto> infoDishes) {
+        if(infoDishes.isEmpty())
+            throw new NoDataFoundException("No dishes provided in the request");
+        List<DishAndAmountDto> dishAndAmountDtoList = new ArrayList<>();
+        try{
+            infoDishes.stream()
+                    .collect(Collectors.groupingBy(IdDishAndAmountDto::getIdDish, Collectors.summingInt(IdDishAndAmountDto::getAmount))) // sum the amount of repeated dishes.
+                    .entrySet().stream() //the result is a Set so now the key is the idDish, the value is the amount.
+                    .forEach(infoDish -> {
+                        Long idDish = infoDish.getKey();
+                        Integer amount = infoDish.getValue();
+                        Dish dish = findById(idDish);
+                        if (dish.getActive().equals(false) || !dish.getRestaurant().getId().equals(idRestaurant))
+                            throw new FailValidatingRequiredVariableException("Dish with id: "+idDish+ ", is disabled or is not from the restaurant with id: " + idRestaurant);
+                        if (amount <= 0)
+                            throw new FailValidatingRequiredVariableException("Amount is not valid for dish: " + idDish);
+                        dishAndAmountDtoList.add(new DishAndAmountDto(dish,amount));
+                    });
+            return dishAndAmountDtoList;
+        } catch (NullPointerException e){
+            throw new FailValidatingRequiredVariableException("List of dishes is malformed");
+        }
     }
 }

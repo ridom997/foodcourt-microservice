@@ -41,6 +41,7 @@ public class RestaurantUseCase implements IRestaurantServicePort {
 
     @Override
     public Restaurant findById(Long id) {
+        ArgumentValidations.validateObject(id,"idRestaurant");
         Restaurant restaurant = restaurantPersistancePort.findById(id);
         if (restaurant == null)
             throw new NoRestaurantFoundException();

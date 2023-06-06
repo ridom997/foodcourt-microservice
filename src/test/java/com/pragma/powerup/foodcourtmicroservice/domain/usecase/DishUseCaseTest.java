@@ -2,8 +2,10 @@ package com.pragma.powerup.foodcourtmicroservice.domain.usecase;
 
 import com.pragma.powerup.foodcourtmicroservice.domain.api.ICategoryServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IRestaurantServicePort;
+import com.pragma.powerup.foodcourtmicroservice.domain.dto.DishAndAmountDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.DishAndRestaurantOwnerIdDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.EditDishInfoDto;
+import com.pragma.powerup.foodcourtmicroservice.domain.dto.IdDishAndAmountDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.FailValidatingRequiredVariableException;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.NoDataFoundException;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.NoDishFoundException;
@@ -22,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -307,6 +310,51 @@ class DishUseCaseTest {
         verify(restaurantServicePort, times(1)).findById(idRestaurant);
         verify(dishPersistancePort, times(1))
                 .getDishesByRestaurantAndCategory(page, sizePage, restaurant.getId(), null);
+    }
+
+    @Test
+    void generateValidatedDishListTest_emptyInfoDishes() {
+        List<IdDishAndAmountDto> infoDishes = new ArrayList<>();
+
+        assertThrows(NoDataFoundException.class, () -> dishUseCase.generateValidatedDishList(1L, infoDishes));
+    }
+
+    @Test
+    void generateValidatedDishListTest_malformedIdDishAndAmountDto() {
+        List<IdDishAndAmountDto> infoDishes = Arrays.asList(new IdDishAndAmountDto(1L, null));
+
+        assertThrows(FailValidatingRequiredVariableException.class, () -> dishUseCase.generateValidatedDishList(1L, infoDishes));
+    }
+
+    @Test
+    void generateValidatedDishListTest_dishNotFromRestaurant() {
+        List<IdDishAndAmountDto> infoDishes = Arrays.asList(new IdDishAndAmountDto(1L, 1));
+        idealDish.setRestaurant(new Restaurant(1L));
+        when(dishPersistancePort.findById(1L)).thenReturn(idealDish);
+
+        assertThrows(FailValidatingRequiredVariableException.class, () -> dishUseCase.generateValidatedDishList(2L, infoDishes));
+    }
+
+    @Test
+    void generateValidatedDishListTest_amountInvalid() {
+        List<IdDishAndAmountDto> infoDishes = Arrays.asList(new IdDishAndAmountDto(1L, 0));
+        idealDish.setRestaurant(new Restaurant(1L));
+        when(dishPersistancePort.findById(1L)).thenReturn(idealDish);
+
+        assertThrows(FailValidatingRequiredVariableException.class, () -> dishUseCase.generateValidatedDishList(1L, infoDishes));
+    }
+
+    @Test
+    void testGenerateValidatedDishList_validInput() {
+        List<IdDishAndAmountDto> infoDishes = Arrays.asList(new IdDishAndAmountDto(1L, 2),new IdDishAndAmountDto(1L, 4));
+        when(dishPersistancePort.findById(1L)).thenReturn(idealDish);
+        idealDish.setRestaurant(new Restaurant(1L));
+
+        List<DishAndAmountDto> result = dishUseCase.generateValidatedDishList(1L, infoDishes);
+
+        assertEquals(1, result.size());
+        assertEquals(1L, result.get(0).getDish().getId());
+        assertEquals(6, result.get(0).getAmount());
     }
 
 }

@@ -19,3 +19,6 @@ INSERT INTO category (id, description, name) VALUES(102, 'Italian Food', 'Italia
 INSERT INTO category (id, description, name) VALUES(103, 'Fishes and sea food.', 'Fishes');
 INSERT INTO powerup.dish (active,description,name,price,url_image,id_category,id_restaurant) VALUES
 	 (1,'Chicharron, frisoles, arroz y platano.','Bandeja paisa',32000,'https://cdn.colombia.com/gastronomia/2011/08/02/bandeja-paisa-1616.gif',101,100);
+
+-- HU --11
+ALTER TABLE powerup.`order` MODIFY date DATETIME;

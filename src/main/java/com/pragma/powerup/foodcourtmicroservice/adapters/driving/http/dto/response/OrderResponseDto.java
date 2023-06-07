@@ -25,4 +25,6 @@ public class OrderResponseDto {
     private Long idChef;
     @Schema(example = "100")
     private Long idRestaurant;
+    @Schema(example = "Food Pragma")
+    private String nameRestaurant;
 }

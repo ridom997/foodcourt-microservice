@@ -100,6 +100,14 @@ En caso de usar un endpoint sin la autorización necesaria saldrá de respuesta 
 + Para consumir el endpoint "/orders" es necesario estar autenticado como cliente.
 + El cliente puede crear una orden en X restaurante solo si no tiene una orden en dicho restaurante en estado activo (estados activos: 1,2 ó 3)
 + En caso de que en la variable dishes del request, vengan repetido un mismo idDish, las cantidades del mismo seran sumadas.
+### HU12:
++ Se hizo un endpoint "/restaurants/{idRestaurant}/orders" el cual debe ser utilizado autenticado como empleado (employee).
++ Es necesario que el user-microservice tambien esté corriendo en la ultima version.
++ Los estados de las ordenes se manejan como enteros, a continuacion se muestran dichos estados y su significado:
+  + 1: PENDING (orden pendiente por empezar)
+  + 2: IN PROGRESS (orden en progreso)
+  + 3: READY (orden lista para recoger o enviar)
+  + 4: DELIVERED (finalizada)
 <!-- ROADMAP -->
 ## Tests
 

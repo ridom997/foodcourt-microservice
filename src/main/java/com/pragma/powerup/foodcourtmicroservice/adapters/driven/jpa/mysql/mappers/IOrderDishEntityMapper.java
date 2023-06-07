@@ -33,5 +33,11 @@ public interface IOrderDishEntityMapper {
     OrderDishEntity mapToEntity(OrderDish orderDish);
 
 
+    @Named("mapToDish")
+    default Dish mapToDishEntity(DishEntity dishEntity){
+        return new Dish(dishEntity.getId(),dishEntity.getName());
+    }
+
+    @Mapping(source = "orderDishEntity.idDish", target = "dish", qualifiedByName = "mapToDish")
     OrderDish toOrderDish(OrderDishEntity orderDishEntity);
 }

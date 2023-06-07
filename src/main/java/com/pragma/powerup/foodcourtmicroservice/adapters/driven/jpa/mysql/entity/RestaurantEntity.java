@@ -54,4 +54,8 @@ public class RestaurantEntity {
     public RestaurantEntity(Long id) {
         this.id = id;
     }
+    public RestaurantEntity(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 }

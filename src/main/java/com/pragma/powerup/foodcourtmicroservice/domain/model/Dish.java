@@ -82,4 +82,26 @@ public class Dish {
     public void setActive(Boolean active) {
         this.active = active;
     }
+
+    public Dish() {
+    }
+
+    public Dish(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return "Dish{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", category=" + category +
+                ", description='" + description + '\'' +
+                ", price=" + price +
+                ", restaurant=" + restaurant +
+                ", urlImage='" + urlImage + '\'' +
+                ", active=" + active +
+                '}';
+    }
 }

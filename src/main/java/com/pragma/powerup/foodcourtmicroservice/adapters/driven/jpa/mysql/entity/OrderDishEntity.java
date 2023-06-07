@@ -25,4 +25,13 @@ public class OrderDishEntity {
     @Column(name = "amount")
     private Integer amount;
 
+    @Override
+    public String toString() {
+        return "OrderDishEntity{" +
+                "id=" + id +
+                ", idOrder=" + idOrder +
+                ", idDish=" + idDish.toString() +
+                ", amount=" + amount +
+                '}';
+    }
 }

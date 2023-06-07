@@ -56,4 +56,18 @@ public class DishEntity {
     public DishEntity(Long id) {
         this.id = id;
     }
+
+    @Override
+    public String toString() {
+        return "DishEntity{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", idCategory=" + idCategory +
+                ", description='" + description + '\'' +
+                ", price=" + price +
+                ", idRestaurant=" + idRestaurant +
+                ", urlImage='" + urlImage + '\'' +
+                ", active=" + active+
+                '}';
+    }
 }

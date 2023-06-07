@@ -6,13 +6,18 @@ import com.pragma.powerup.foodcourtmicroservice.domain.api.IRestaurantServicePor
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.DishAndAmountDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.IdDishAndAmountDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.NewOrderDto;
+import com.pragma.powerup.foodcourtmicroservice.domain.dto.OrderWithDetailDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.ClientAlreadyHasAnActiveOrderException;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.FailValidatingRequiredVariableException;
+import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.NoDataFoundException;
+import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.UserHasNoPermissionException;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Order;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Restaurant;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.IOrderPersistencePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.ITokenValidationPort;
+import com.pragma.powerup.foodcourtmicroservice.domain.spi.IUserValidationComunicationPort;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -39,6 +44,9 @@ class OrderUseCaseTest {
     private IRestaurantServicePort restaurantServicePort;
     @Mock
     private IOrderDishServicePort orderDishServicePort;
+
+    @Mock
+    private IUserValidationComunicationPort userValidationComunicationPort;
 
     @InjectMocks
     private OrderUseCase orderUseCase;
@@ -162,4 +170,65 @@ class OrderUseCaseTest {
         assertEquals(true, result);
         verify(orderPersistencePort, times(1)).existOrderOfClientWithDifferentStatus(idClient, status, idRestaurant);
     }
+
+
+    @Test
+    void findAllPagedOrdersByIdStatus_whenUserIsNotEmployee() {
+        Long idRestaurant = 1L;
+        Integer status = 1;
+        Integer page = 0;
+        Integer sizePage = 10;
+        String token = "token";
+        Boolean isAnEmployeeOfTheRestaurant = false;
+        when(userValidationComunicationPort.existsRelationWithUserAndIdRestaurant(idRestaurant)).thenReturn(isAnEmployeeOfTheRestaurant);
+
+        assertThrows(UserHasNoPermissionException.class,
+                () -> orderUseCase.findAllPagedOrdersByIdStatus(idRestaurant, status, page, sizePage, token)
+        );
+
+        verify(tokenValidationPort, times(1)).verifyRoleInToken(token, "ROLE_EMPLOYEE");
+        verify(userValidationComunicationPort, times(1)).existsRelationWithUserAndIdRestaurant(idRestaurant);
+        verify(orderPersistencePort, never()).getOrdersByRestaurantAndStatus(page, sizePage, idRestaurant, status);
+    }
+
+    @Test
+    void findAllPagedOrdersByIdStatus_whenNoOrdersWithGivenStatus() {
+        Long idRestaurant = 1L;
+        Integer status = 1;
+        Integer page = 0;
+        Integer sizePage = 10;
+        String token = "token";
+        when(orderPersistencePort.getOrdersByRestaurantAndStatus(page, sizePage, idRestaurant, status)).thenReturn(List.of());
+        when(userValidationComunicationPort.existsRelationWithUserAndIdRestaurant(idRestaurant)).thenReturn(true);
+
+        NoDataFoundException exception = assertThrows(NoDataFoundException.class, () -> {
+            orderUseCase.findAllPagedOrdersByIdStatus(idRestaurant, status, page, sizePage, token);
+        });
+
+        assertEquals("No orders found", exception.getMessage());
+        verify(tokenValidationPort, times(1)).verifyRoleInToken(token, "ROLE_EMPLOYEE");
+        verify(userValidationComunicationPort, times(1)).existsRelationWithUserAndIdRestaurant(idRestaurant);
+        verify(orderPersistencePort, times(1)).getOrdersByRestaurantAndStatus(page, sizePage, idRestaurant, status);
+    }
+
+    @Test
+    void findAllPagedOrdersByIdStatus_successfully() {
+        Long idRestaurant = 1L;
+        Integer status = 1;
+        Integer page = 0;
+        Integer sizePage = 10;
+        String token = "token";
+        List<Order> orderList = List.of(new Order());
+        when(orderPersistencePort.getOrdersByRestaurantAndStatus(page, sizePage, idRestaurant, status)).thenReturn(orderList);
+        when(userValidationComunicationPort.existsRelationWithUserAndIdRestaurant(idRestaurant)).thenReturn(true);
+
+
+        List<OrderWithDetailDto> allPagedOrdersByIdStatus = orderUseCase.findAllPagedOrdersByIdStatus(idRestaurant, status, page, sizePage, token);
+
+
+        verify(tokenValidationPort, times(1)).verifyRoleInToken(token, "ROLE_EMPLOYEE");
+        verify(userValidationComunicationPort, times(1)).existsRelationWithUserAndIdRestaurant(idRestaurant);
+        verify(orderPersistencePort, times(1)).getOrdersByRestaurantAndStatus(page, sizePage, idRestaurant, status);
+    }
+
 }

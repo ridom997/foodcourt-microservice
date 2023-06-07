@@ -8,7 +8,7 @@ import java.util.*;
 
 
 public class RequestParamValidator {
-    private static final List<String> ALLOWED_PARAMS = Arrays.asList("size", "page","idCategory");
+    private static final List<String> ALLOWED_PARAMS = Arrays.asList("size", "page","idCategory","idStatus");
     private RequestParamValidator(){}
 
     public static void validate(HttpServletRequest request) {

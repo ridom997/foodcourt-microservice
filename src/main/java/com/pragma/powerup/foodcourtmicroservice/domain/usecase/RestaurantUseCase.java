@@ -41,7 +41,7 @@ public class RestaurantUseCase implements IRestaurantServicePort {
 
     @Override
     public Restaurant findById(Long id) {
-        ArgumentValidations.validateObject(id,"idRestaurant");
+        ArgumentValidations.validateObject(id, ID_RESTAURANT_STRING_VALUE);
         Restaurant restaurant = restaurantPersistancePort.findById(id);
         if (restaurant == null)
             throw new NoRestaurantFoundException();
@@ -55,7 +55,7 @@ public class RestaurantUseCase implements IRestaurantServicePort {
 
     @Override
     public Boolean isTheRestaurantOwner(String token, Long idRestaurant) {
-        ArgumentValidations.validateObject(idRestaurant,"idRestaurant");
+        ArgumentValidations.validateObject(idRestaurant, ID_RESTAURANT_STRING_VALUE);
         ArgumentValidations.validateString(token,TOKEN_MESSAGE);
         Long idUserFromToken = tokenValidationPort.findIdUserFromToken(token);
         Restaurant restaurant = findById(idRestaurant);

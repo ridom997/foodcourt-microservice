@@ -1,6 +1,7 @@
 package com.pragma.powerup.foodcourtmicroservice.configuration;
 
 import com.pragma.powerup.foodcourtmicroservice.adapters.driven.feign.exceptions.FailConnectionToExternalMicroserviceException;
+import com.pragma.powerup.foodcourtmicroservice.adapters.driven.feign.exceptions.NoRestaurantAssociatedWithUserException;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driven.feign.exceptions.UserNotFoundFeignException;
 import com.pragma.powerup.foodcourtmicroservice.configuration.security.exception.InvalidRequestParamException;
 import com.pragma.powerup.foodcourtmicroservice.configuration.security.exception.NonUniqueRequestParamException;
@@ -150,6 +151,12 @@ public class ControllerAdvisor {
     public ResponseEntity<Map<String, String>> handleClientAlreadyHasAnActiveOrderException(ClientAlreadyHasAnActiveOrderException clientAlreadyHasAnActiveOrderException) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY, "Client has an active order in the selected restaurant."));
+    }
+
+    @ExceptionHandler(NoRestaurantAssociatedWithUserException.class)
+    public ResponseEntity<Map<String, String>> handleNoRestaurantAssociatedWithUserException(NoRestaurantAssociatedWithUserException noRestaurantAssociatedWithUserException) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY, "Employee doesn't have a restaurant associated"));
     }
 
 }

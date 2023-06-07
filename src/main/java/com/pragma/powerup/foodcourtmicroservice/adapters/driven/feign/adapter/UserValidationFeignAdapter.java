@@ -3,6 +3,7 @@ package com.pragma.powerup.foodcourtmicroservice.adapters.driven.feign.adapter;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driven.feign.client.UserFeignClient;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driven.feign.dto.request.UserAndRoleRequestDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driven.feign.exceptions.FailConnectionToExternalMicroserviceException;
+import com.pragma.powerup.foodcourtmicroservice.adapters.driven.feign.exceptions.NoRestaurantAssociatedWithUserException;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driven.feign.exceptions.UserNotFoundFeignException;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.IUserValidationComunicationPort;
 import feign.FeignException;
@@ -25,6 +26,18 @@ public class UserValidationFeignAdapter implements IUserValidationComunicationPo
             return response.get("result");
         } catch (FeignException.NotFound e) {
             throw new UserNotFoundFeignException(e);
+        } catch (RetryableException e){
+            throw new FailConnectionToExternalMicroserviceException();
+        }
+    }
+
+    @Override
+    public Boolean existsRelationWithUserAndIdRestaurant(Long idRestaurant) {
+        try {
+            Map<String, Boolean> response = userFeignClient.existsRelationWithUserAndIdRestaurant(idRestaurant);
+            return response.get("isARestaurantEmployee");
+        } catch (FeignException.NotFound e) {
+            throw new NoRestaurantAssociatedWithUserException();
         } catch (RetryableException e){
             throw new FailConnectionToExternalMicroserviceException();
         }

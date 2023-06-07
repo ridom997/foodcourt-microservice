@@ -73,7 +73,7 @@ public class BeanConfiguration {
 
     @Bean
     public IOrderDishPersistencePort orderDishPersistencePort(){
-        return new OrderDishMysqlAdapter(orderDishEntityRepository,orderDishEntityMapper);
+        return new OrderDishMysqlAdapter(orderDishEntityRepository,orderDishEntityMapper,orderEntityMapper);
     }
     @Bean
     public IOrderPersistencePort orderPersistencePort(){
@@ -90,6 +90,6 @@ public class BeanConfiguration {
                 tokenValidationPort(),
                 dishServicePort(),
                 restaurantServicePort(),
-                orderDishServicePort());
+                orderDishServicePort(),userValidationServicePort);
     }
 }

@@ -2,8 +2,10 @@ package com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.controlle
 
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.request.RestaurantRequestDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.DishResponseDto;
+import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.OrderWithDetailResponseDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.RestaurantResponseDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.handlers.IDishHandler;
+import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.handlers.IOrderHandler;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.handlers.IRestaurantHandler;
 import com.pragma.powerup.foodcourtmicroservice.configuration.Constants;
 import com.pragma.powerup.foodcourtmicroservice.configuration.security.RequestParamValidator;
@@ -32,6 +34,7 @@ public class RestaurantController {
 
     private final IRestaurantHandler restaurantHandler;
     private final IDishHandler dishHandler;
+    private final IOrderHandler orderHandler;
 
     @Operation(summary = "Add a new restaurant",
             responses = {
@@ -114,4 +117,33 @@ public class RestaurantController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(dishHandler.getPagedDishesByRestaurantAndOptionalCategory(page,size,idRestaurant,idCategory));
     }
+
+    @Operation(summary = "Find all orders of restaurants by status",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "List of orders found (returns a list of objects similar to the example object)",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = OrderWithDetailResponseDto.class))),
+                    @ApiResponse(responseCode = "400", description = "Bad request (check response message)",
+                            content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized request",
+                            content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
+                    @ApiResponse(responseCode = "403", description = "User who made the request is not an employee of the given restaurant",
+                            content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
+                    @ApiResponse(responseCode = "404", description = "Employee doesnt have idRestaurant associated or no orders found or no detail found in an order",
+                            content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
+                    @ApiResponse(responseCode = "500", description = "Error in communication with user-microservice",
+                            content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error")))
+            })
+    @GetMapping(value = "/{idRestaurant}/orders")
+    public ResponseEntity<List<OrderWithDetailResponseDto>> findAllOrdersByStatus(
+            HttpServletRequest httpServletRequest,
+            @PathVariable Long idRestaurant,
+            @RequestParam Integer idStatus,
+            @RequestParam int page,
+            @RequestParam int size
+    ) {
+        RequestParamValidator.validate(httpServletRequest); //validate request params
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(orderHandler.findAllPagedOrdersByIdStatus(idRestaurant,idStatus,page,size));
+    }
+
 }

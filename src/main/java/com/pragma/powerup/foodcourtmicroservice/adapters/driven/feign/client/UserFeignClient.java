@@ -2,6 +2,8 @@ package com.pragma.powerup.foodcourtmicroservice.adapters.driven.feign.client;
 
 import com.pragma.powerup.foodcourtmicroservice.adapters.driven.feign.dto.request.UserAndRoleRequestDto;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -12,4 +14,8 @@ public interface UserFeignClient {
 
     @PostMapping("/validateRole")
     Map<String,Boolean> userHasRole(@RequestBody UserAndRoleRequestDto userAndRoleRequestDto);
+
+    @GetMapping(value = "/validate-restaurant/{id_restaurant}")
+    Map<String,Boolean> existsRelationWithUserAndIdRestaurant(@PathVariable("id_restaurant") Long idRestaurant);
+
 }

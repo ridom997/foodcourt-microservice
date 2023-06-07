@@ -2,6 +2,7 @@ package com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.handlers.
 
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.request.NewOrderRequestDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.OrderResponseDto;
+import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.OrderWithDetailResponseDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.handlers.IOrderHandler;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.mapper.request.IOrderRequestMapper;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.mapper.response.IOrderResponseMapper;
@@ -9,6 +10,8 @@ import com.pragma.powerup.foodcourtmicroservice.configuration.security.jwt.JwtUt
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IOrderServicePort;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 
 @AllArgsConstructor
@@ -24,5 +27,12 @@ public class OrderHandlerImpl implements IOrderHandler {
         return orderResponseMapper.toOrderResponseDto(
                 orderServicePort.saveOrder(orderRequestMapper.toDomainObject(newOrderRequestDto), JwtUtils.getTokenFromRequestHeaders())
         );
+    }
+
+    @Override
+    public List<OrderWithDetailResponseDto> findAllPagedOrdersByIdStatus(Long idRestaurant, Integer status, Integer page, Integer sizePage) {
+        return orderServicePort.findAllPagedOrdersByIdStatus(idRestaurant,status,page,sizePage,JwtUtils.getTokenFromRequestHeaders())
+                .stream()
+                .map(orderResponseMapper::toOrderWithDetailResponseDto).toList();
     }
 }

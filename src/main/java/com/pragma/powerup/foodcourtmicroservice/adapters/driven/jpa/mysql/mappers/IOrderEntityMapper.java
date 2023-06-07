@@ -16,7 +16,7 @@ public interface IOrderEntityMapper {
 
     @Named("mapToRestaurantEntity")
     default RestaurantEntity mapRestaurantToRestaurantEntity(Restaurant restaurant){
-        return new RestaurantEntity(restaurant.getId());
+        return new RestaurantEntity(restaurant.getId(),restaurant.getName());
     }
 
     @Named("mapToRestaurant")

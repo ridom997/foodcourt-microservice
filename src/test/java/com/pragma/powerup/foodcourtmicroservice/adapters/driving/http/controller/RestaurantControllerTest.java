@@ -6,6 +6,7 @@ import com.pragma.powerup.foodcourtmicroservice.adapters.driven.feign.exceptions
 import com.pragma.powerup.foodcourtmicroservice.adapters.driven.feign.exceptions.UserNotFoundFeignException;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.request.RestaurantRequestDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.handlers.IDishHandler;
+import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.handlers.IOrderHandler;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.handlers.IRestaurantHandler;
 import com.pragma.powerup.foodcourtmicroservice.configuration.ControllerAdvisor;
 import com.pragma.powerup.foodcourtmicroservice.configuration.security.RequestParamValidator;
@@ -50,11 +51,14 @@ class RestaurantControllerTest {
 
     @Mock
     private IDishHandler dishHandler;
+
+    @Mock
+    private IOrderHandler orderHandler;
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-        restaurantController = new RestaurantController(mockRestaurantHandler,dishHandler);
+        restaurantController = new RestaurantController(mockRestaurantHandler,dishHandler,orderHandler);
         mockMvc = MockMvcBuilders.standaloneSetup(restaurantController).setControllerAdvice(new ControllerAdvisor()).build();
     }
 

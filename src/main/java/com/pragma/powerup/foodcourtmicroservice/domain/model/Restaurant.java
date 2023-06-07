@@ -19,8 +19,8 @@ public class Restaurant {
     }
 
     public Restaurant(Long id, String name) {
-        this.name = name;
         this.id = id;
+        this.name = name;
     }
 
     public Restaurant(Long id, String name, String address, Long idOwner, String phone, String urlLogo, String nit) {

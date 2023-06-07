@@ -8,5 +8,6 @@ import java.util.List;
 
 public interface IOrderDishServicePort {
     List<OrderDish> saveListOrderDish(Order order, List<DishAndAmountDto> dishListWithAmount);
+    List<OrderDish> getAllOrderDishByOrder(Order order);
 
 }

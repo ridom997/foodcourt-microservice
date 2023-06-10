@@ -1,8 +1,6 @@
 package com.pragma.powerup.foodcourtmicroservice.configuration;
 
-import com.pragma.powerup.foodcourtmicroservice.adapters.driven.feign.exceptions.FailConnectionToExternalMicroserviceException;
-import com.pragma.powerup.foodcourtmicroservice.adapters.driven.feign.exceptions.NoRestaurantAssociatedWithUserException;
-import com.pragma.powerup.foodcourtmicroservice.adapters.driven.feign.exceptions.UserNotFoundFeignException;
+import com.pragma.powerup.foodcourtmicroservice.adapters.driven.feign.exceptions.*;
 import com.pragma.powerup.foodcourtmicroservice.configuration.security.exception.InvalidRequestParamException;
 import com.pragma.powerup.foodcourtmicroservice.configuration.security.exception.NonUniqueRequestParamException;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.*;
@@ -52,10 +50,10 @@ public class ControllerAdvisor {
                 .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY, WRONG_CREDENTIALS_MESSAGE));
     }
 
-    @ExceptionHandler(UserHasNoPermissionException.class)
-    public ResponseEntity<Map<String, String>> handleUserHasNoPermission(UserHasNoPermissionException userHasNoPermissionException) {
+    @ExceptionHandler({UserHasNoPermissionException.class, UnauthorizedFeignException.class})
+    public ResponseEntity<Map<String, String>> handleUserHasNoPermission(Exception e) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY, userHasNoPermissionException.getMessage()));
+                .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY, e.getMessage()));
     }
 
     @ExceptionHandler(UserNotFoundFeignException.class)
@@ -157,6 +155,11 @@ public class ControllerAdvisor {
     public ResponseEntity<Map<String, String>> handleNoRestaurantAssociatedWithUserException(NoRestaurantAssociatedWithUserException noRestaurantAssociatedWithUserException) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY, "Employee doesn't have a restaurant associated"));
+    }
+    @ExceptionHandler(BadRequestFeignException.class)
+    public ResponseEntity<Map<String, String>> handleBadRequestFeignException(BadRequestFeignException badRequestFeignException) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY, "Bad request exception from traceability microservice"));
     }
 
 }

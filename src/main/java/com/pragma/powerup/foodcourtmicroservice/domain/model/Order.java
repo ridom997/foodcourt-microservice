@@ -10,6 +10,7 @@ public class Order {
     private Long idChef;
     private Restaurant restaurant;
 
+    private LocalDateTime dateFinished;
     public Long getId() {
         return id;
     }
@@ -58,16 +59,15 @@ public class Order {
         this.restaurant = restaurant;
     }
 
-    public Order() {
+    public LocalDateTime getDateFinished() {
+        return dateFinished;
     }
 
-    public Order(Long id, Long idClient, LocalDateTime date, Integer status, Long idChef, Restaurant restaurant) {
-        this.id = id;
-        this.idClient = idClient;
-        this.date = date;
-        this.status = status;
-        this.idChef = idChef;
-        this.restaurant = restaurant;
+    public void setDateFinished(LocalDateTime dateFinished) {
+        this.dateFinished = dateFinished;
+    }
+
+    public Order() {
     }
 
     public Order(Long idClient, LocalDateTime date, Integer status, Long idChef, Restaurant restaurant) {

@@ -9,4 +9,6 @@ import java.util.List;
 public interface IOrderHandler {
     OrderResponseDto createOrder(NewOrderRequestDto newOrderRequestDto);
     List<OrderWithDetailResponseDto> findAllPagedOrdersByIdStatus(Long idRestaurant, Integer status, Integer page, Integer sizePage);
+
+    OrderResponseDto assignOrder(Long idOrder);
 }

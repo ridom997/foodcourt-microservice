@@ -22,6 +22,7 @@ import com.pragma.powerup.foodcourtmicroservice.domain.validations.PaginationVal
 import java.util.List;
 
 import static com.pragma.powerup.foodcourtmicroservice.configuration.Constants.*;
+import static com.pragma.powerup.foodcourtmicroservice.domain.constants.MessageConstants.USER_IS_NOT_AN_EMPLOYEE_OF_THE_RESTAURANT;
 
 public class OrderUseCase implements IOrderServicePort {
 
@@ -57,6 +58,15 @@ public class OrderUseCase implements IOrderServicePort {
     }
 
     @Override
+    public Order findById(Long idOrder) {
+        ArgumentValidations.validateObject(idOrder, "idOrder");
+        Order order = orderPersistencePort.findById(idOrder);
+        if (order == null)
+            throw new NoDataFoundException("Order not found");
+        return order;
+    }
+
+    @Override
     public Boolean existActiveOrderOfClient(Long idClient, Integer status, Long idRestaurant) {
         ArgumentValidations.validateObject(idClient, "idClient");
         ArgumentValidations.validateObject(idRestaurant, ID_RESTAURANT_STRING_VALUE);
@@ -72,13 +82,28 @@ public class OrderUseCase implements IOrderServicePort {
         ArgumentValidations.validateObject(status,ORDER_STATUS_STRING_VALUE);
         Boolean isAnEmployeeOfTheRestaurant = userValidationComunicationPort.existsRelationWithUserAndIdRestaurant(idRestaurant);
         if(Boolean.FALSE.equals(isAnEmployeeOfTheRestaurant))
-            throw new UserHasNoPermissionException("User who made the request is not an employee of the restaurant.");
+            throw new UserHasNoPermissionException(USER_IS_NOT_AN_EMPLOYEE_OF_THE_RESTAURANT);
         List<Order> ordersByRestaurantAndStatus = orderPersistencePort.getOrdersByRestaurantAndStatus(page, sizePage, idRestaurant, status);
         if (ordersByRestaurantAndStatus.isEmpty())
             throw new NoDataFoundException("No orders found");
         return ordersByRestaurantAndStatus.stream()
                 .map(order -> new OrderWithDetailDto(order, orderDishServicePort.getAllOrderDishByOrder(order)))
                 .toList();
+    }
+
+    @Override
+    public Order assignOrder(Long idOrder, String token) {
+        Long idEmployee = tokenValidationPort.findIdUserFromToken(token);
+        tokenValidationPort.verifyRoleInToken(token, EMPLOYEE_ROLE_NAME);
+        Order order = findById(idOrder);
+        Boolean isAnEmployeeOfTheRestaurant = userValidationComunicationPort.existsRelationWithUserAndIdRestaurant(order.getRestaurant().getId());
+        if(Boolean.FALSE.equals(isAnEmployeeOfTheRestaurant))
+            throw new UserHasNoPermissionException(USER_IS_NOT_AN_EMPLOYEE_OF_THE_RESTAURANT);
+        if (order.getStatus() != 1 ||  (order.getIdChef() != null && order.getIdChef() != 0))
+            throw new UserHasNoPermissionException("Order is already taken or activated");
+        order.setIdChef(idEmployee);
+        order.setStatus(2); //in progress
+        return orderPersistencePort.saveOrderAndTraceability(order,OrderMapper.mapToOrderLogDto(order,idEmployee,1));
     }
 
 

@@ -9,8 +9,12 @@ import java.util.List;
 public interface IOrderServicePort {
     Order saveOrder(NewOrderDto newOrderDto, String token);
 
+    Order findById(Long idOrder);
+
     Boolean existActiveOrderOfClient(Long idClient, Integer status, Long idRestaurant);
 
     List<OrderWithDetailDto> findAllPagedOrdersByIdStatus(Long idRestaurant, Integer status, Integer page, Integer sizePage, String token);
+
+    Order assignOrder(Long idOrder, String token);
 
 }

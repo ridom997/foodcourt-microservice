@@ -21,7 +21,7 @@ public class OrderResponseDto {
     private LocalDateTime date;
     @Schema(example = "PENDING")
     private String status;
-    @Schema(example = "0")
+    @Schema(example = "1")
     private Long idChef;
     @Schema(example = "100")
     private Long idRestaurant;

@@ -26,6 +26,9 @@ public class OrderEntity {
     @Column(name = "date")
     private LocalDateTime date;
 
+    @Column(name = "date_finished")
+    private LocalDateTime dateFinished;
+
     @Column(name = "status")
     private Integer status;
 

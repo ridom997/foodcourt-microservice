@@ -1,5 +1,6 @@
 package com.pragma.powerup.foodcourtmicroservice.configuration;
 
+import com.pragma.powerup.foodcourtmicroservice.adapters.driven.feign.adapter.TraceabilityMicroFeignAdapter;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driven.feign.adapter.UserValidationFeignAdapter;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driven.jpa.mysql.adapter.*;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driven.jpa.mysql.mappers.*;
@@ -21,6 +22,7 @@ public class BeanConfiguration {
     private final IRestaurantEntityMapper restaurantEntityMapper;
 
     private final UserValidationFeignAdapter userValidationServicePort;
+    private final TraceabilityMicroFeignAdapter traceabilityCommunicationPort;
 
     private final IDishEntityMapper iDishEntityMapper;
     private final IDishEntityRepository dishEntityRepository;
@@ -77,7 +79,7 @@ public class BeanConfiguration {
     }
     @Bean
     public IOrderPersistencePort orderPersistencePort(){
-        return new OrderMysqlAdapter(orderEntityRepository,orderEntityMapper);
+        return new OrderMysqlAdapter(orderEntityRepository,orderEntityMapper, traceabilityCommunicationPort);
     }
 
     @Bean

@@ -35,4 +35,11 @@ public class OrderHandlerImpl implements IOrderHandler {
                 .stream()
                 .map(orderResponseMapper::toOrderWithDetailResponseDto).toList();
     }
+
+    @Override
+    public OrderResponseDto assignOrder(Long idOrder) {
+        return orderResponseMapper.toOrderResponseDto(
+                orderServicePort.assignOrder(idOrder, JwtUtils.getTokenFromRequestHeaders())
+        );
+    }
 }

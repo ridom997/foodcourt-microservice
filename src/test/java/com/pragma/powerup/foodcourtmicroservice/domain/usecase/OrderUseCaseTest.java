@@ -3,10 +3,7 @@ package com.pragma.powerup.foodcourtmicroservice.domain.usecase;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IDishServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IOrderDishServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IRestaurantServicePort;
-import com.pragma.powerup.foodcourtmicroservice.domain.dto.DishAndAmountDto;
-import com.pragma.powerup.foodcourtmicroservice.domain.dto.IdDishAndAmountDto;
-import com.pragma.powerup.foodcourtmicroservice.domain.dto.NewOrderDto;
-import com.pragma.powerup.foodcourtmicroservice.domain.dto.OrderWithDetailDto;
+import com.pragma.powerup.foodcourtmicroservice.domain.dto.*;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.ClientAlreadyHasAnActiveOrderException;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.FailValidatingRequiredVariableException;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.NoDataFoundException;
@@ -15,6 +12,7 @@ import com.pragma.powerup.foodcourtmicroservice.domain.model.Order;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Restaurant;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.IOrderPersistencePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.ITokenValidationPort;
+import com.pragma.powerup.foodcourtmicroservice.domain.spi.ITraceabilityCommunicationPort;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.IUserValidationComunicationPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -44,6 +42,9 @@ class OrderUseCaseTest {
     private IRestaurantServicePort restaurantServicePort;
     @Mock
     private IOrderDishServicePort orderDishServicePort;
+
+    @Mock
+    private ITraceabilityCommunicationPort traceabilityCommunicationPort;
 
     @Mock
     private IUserValidationComunicationPort userValidationComunicationPort;
@@ -229,6 +230,69 @@ class OrderUseCaseTest {
         verify(tokenValidationPort, times(1)).verifyRoleInToken(token, "ROLE_EMPLOYEE");
         verify(userValidationComunicationPort, times(1)).existsRelationWithUserAndIdRestaurant(idRestaurant);
         verify(orderPersistencePort, times(1)).getOrdersByRestaurantAndStatus(page, sizePage, idRestaurant, status);
+    }
+
+    @Test
+    @DisplayName("Should assign the order to an employee when the order is not taken or activated")
+    void assignOrder_successful() {
+        Long idOrder = 1L;
+        String token = "token";
+        Order order = new Order();
+        order.setStatus(1);
+        order.setRestaurant(new Restaurant());
+        Order orderSaved = new Order();
+        orderSaved.setStatus(2);
+        orderSaved.setIdChef(1L);
+        when(tokenValidationPort.findIdUserFromToken(token)).thenReturn(1L);
+        when(orderPersistencePort.findById(idOrder)).thenReturn(order);
+        when(userValidationComunicationPort.existsRelationWithUserAndIdRestaurant(order.getRestaurant().getId())).thenReturn(true);
+        when(orderPersistencePort.saveOrderAndTraceability(any(Order.class),any(OrderLogDto.class))).thenReturn(orderSaved);
+
+        Order orderResult = orderUseCase.assignOrder(idOrder, token);
+
+        assertEquals(2,orderResult.getStatus());
+    }
+
+
+    @Test
+    void assignOrder_WhenUserIsNotEmployeeOfRestaurantThenThrowException() {
+        Long idOrder = 1L;
+        String token = "token";
+        Order order = new Order();
+        order.setStatus(1);
+        order.setRestaurant(new Restaurant());
+        Order orderSaved = new Order();
+        orderSaved.setStatus(2);
+        orderSaved.setIdChef(1L);
+        when(tokenValidationPort.findIdUserFromToken(token)).thenReturn(1L);
+        when(orderPersistencePort.findById(idOrder)).thenReturn(order);
+        when(userValidationComunicationPort.existsRelationWithUserAndIdRestaurant(order.getRestaurant().getId())).thenReturn(false);
+
+        assertThrows(UserHasNoPermissionException.class, () -> orderUseCase.assignOrder(idOrder, token));
+    }
+
+    @Test
+    void assignOrder_whenOrderIsAlreadyTakenOrActivatedThenThrowException() {
+        Long idOrder = 1L;
+        String token = "token";
+        Order order = new Order();
+        order.setStatus(2);
+        order.setRestaurant(new Restaurant());
+        Order orderSaved = new Order();
+        orderSaved.setStatus(2);
+        orderSaved.setIdChef(1L);
+        when(tokenValidationPort.findIdUserFromToken(token)).thenReturn(1L);
+        when(orderPersistencePort.findById(idOrder)).thenReturn(order);
+        when(userValidationComunicationPort.existsRelationWithUserAndIdRestaurant(order.getRestaurant().getId())).thenReturn(true);
+
+        assertThrows(UserHasNoPermissionException.class, () -> orderUseCase.assignOrder(idOrder, token));
+    }
+
+    @Test
+    void findById_whenNullReturned() {
+        Long idOrder = 1L;
+        when(orderPersistencePort.findById(idOrder)).thenReturn(null);
+        assertThrows(NoDataFoundException.class, () -> orderUseCase.findById(idOrder));
     }
 
 }

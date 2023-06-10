@@ -22,3 +22,7 @@ INSERT INTO powerup.dish (active,description,name,price,url_image,id_category,id
 
 -- HU --11
 ALTER TABLE powerup.`order` MODIFY date DATETIME;
+
+-- HU --13
+-- to assign order to an employee and save the finish date of the order.
+ALTER TABLE powerup.`order` ADD date_finished DATETIME NULL;

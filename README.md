@@ -50,7 +50,7 @@ To get a local copy up and running follow these steps.
 ## Usage
 
 1. Right-click the class FoodCourtMicroserviceApplication and choose Run
-3. Start the user-microservice ["user-microservice"](https://github.com/ridom997/user-microservice)
+3. Start  ["user-microservice"](https://github.com/ridom997/user-microservice) and ["traceability-microservice"](https://github.com/ridom997/traceability-microservice) if the user history indicates it.
 4.  Open [http://localhost:8091/swagger-ui/index.html](http://localhost:8091/swagger-ui/index.html) in your web browser
 5. Test the endpoints (view guide)
 
@@ -108,6 +108,10 @@ En caso de usar un endpoint sin la autorización necesaria saldrá de respuesta 
   + 2: IN PROGRESS (orden en progreso)
   + 3: READY (orden lista para recoger o enviar)
   + 4: DELIVERED (finalizada)
+  + 5: CANCELLED (Cancelado)
+### HU13:
++ Es necesario ejecutar del data.sql la seccion
++ Para consumir el endpoint "/orders/{idOrder}/assignEmployee" es necesario estar autenticado como empleado (employee). Tambien es necesario tener corriendo el microservicio de usuarios y de [trazabilidad](https://github.com/ridom997/traceability-microservice)
 <!-- ROADMAP -->
 ## Tests
 

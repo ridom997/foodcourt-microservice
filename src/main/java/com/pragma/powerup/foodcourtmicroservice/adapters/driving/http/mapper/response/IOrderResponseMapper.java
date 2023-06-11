@@ -1,8 +1,10 @@
 package com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.mapper.response;
 
+import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.OrderAndStatusMessagingResponseDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.OrderDishResponseDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.OrderResponseDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.OrderWithDetailResponseDto;
+import com.pragma.powerup.foodcourtmicroservice.domain.dto.OrderAndStatusMessagingDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.OrderWithDetailDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Order;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.OrderDish;
@@ -44,4 +46,6 @@ public interface IOrderResponseMapper {
 
     @Mapping(source = "orderWithDetailDto.detail", target = "detail", qualifiedByName = "mapListToOrderDishResponseDto")
     OrderWithDetailResponseDto toOrderWithDetailResponseDto(OrderWithDetailDto orderWithDetailDto);
+
+    OrderAndStatusMessagingResponseDto toOrderAndStatusMessagingResponseDto(OrderAndStatusMessagingDto orderAndStatusMessagingDto);
 }

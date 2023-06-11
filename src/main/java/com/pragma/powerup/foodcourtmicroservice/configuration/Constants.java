@@ -67,4 +67,5 @@ public class Constants {
     public static final String DELIVERED_ORDER_STATUS_VALUE = "DELIVERED";
     public static final String ID_RESTAURANT_STRING_VALUE = "idRestaurant";
     public static final String ORDER_STATUS_STRING_VALUE = "Order status";
+    public static final String ORDER_READY_SMS_BODY_BASE_MESSAGE = "Hello, your order is READY! your PIN is: ";
 }

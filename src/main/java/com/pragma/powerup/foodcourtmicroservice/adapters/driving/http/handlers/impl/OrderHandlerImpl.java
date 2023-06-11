@@ -1,6 +1,7 @@
 package com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.handlers.impl;
 
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.request.NewOrderRequestDto;
+import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.OrderAndStatusMessagingResponseDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.OrderResponseDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.OrderWithDetailResponseDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.handlers.IOrderHandler;
@@ -41,5 +42,14 @@ public class OrderHandlerImpl implements IOrderHandler {
         return orderResponseMapper.toOrderResponseDto(
                 orderServicePort.assignOrder(idOrder, JwtUtils.getTokenFromRequestHeaders())
         );
+    }
+
+    @Override
+    public OrderAndStatusMessagingResponseDto orderReady(Long idOrder) {
+        OrderAndStatusMessagingResponseDto responseDto = orderResponseMapper.toOrderAndStatusMessagingResponseDto(
+                orderServicePort.changeStatusToReady(idOrder, JwtUtils.getTokenFromRequestHeaders()));
+        if(Boolean.FALSE.equals(responseDto.getErrorSendingSms())) //if there was an error sending the sms then we return the PIN in the response
+            responseDto.getOrder().setDeliveryPin(null);
+        return responseDto;
     }
 }

@@ -1,6 +1,7 @@
 package com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.controller;
 
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.request.NewOrderRequestDto;
+import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.OrderAndStatusMessagingResponseDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.OrderResponseDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.handlers.IOrderHandler;
 import io.swagger.v3.oas.annotations.Operation;
@@ -62,5 +63,25 @@ public class OrderController {
                 .body(orderHandler.assignOrder(idOrder));
     }
 
+    @Operation(summary = "Set order to status: Ready",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Order was changed to status ready.",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = OrderAndStatusMessagingResponseDto.class))),
+                    @ApiResponse(responseCode = "400", description = "Bad request (check response message)",
+                            content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized request",
+                            content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
+                    @ApiResponse(responseCode = "403", description = "User who made the request is not an employee of the given restaurant or order i´snt in progress",
+                            content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
+                    @ApiResponse(responseCode = "404", description = "Employee does´nt have idRestaurant associated or no order found",
+                            content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
+                    @ApiResponse(responseCode = "500", description = "Error in communication with user-microservice or traceability microservice",
+                            content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error")))
+            })
+    @PatchMapping("/{idOrder}/ready")
+    public ResponseEntity<OrderAndStatusMessagingResponseDto> changeOrderToReady(@PathVariable("idOrder") @Valid Long idOrder) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(orderHandler.orderReady(idOrder));
+    }
 
 }

@@ -26,3 +26,7 @@ ALTER TABLE powerup.`order` MODIFY date DATETIME;
 -- HU --13
 -- to assign order to an employee and save the finish date of the order.
 ALTER TABLE powerup.`order` ADD date_finished DATETIME NULL;
+
+-- HU --14
+-- to set the pin when the order is ready
+ALTER TABLE powerup.`order` ADD delivery_pin varchar(100) NULL;

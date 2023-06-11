@@ -1,5 +1,7 @@
 package com.pragma.powerup.foodcourtmicroservice.domain.utils;
 
+import java.util.UUID;
+
 import static com.pragma.powerup.foodcourtmicroservice.configuration.Constants.*;
 import static com.pragma.powerup.foodcourtmicroservice.configuration.Constants.DELIVERED_ORDER_STATUS_VALUE;
 
@@ -20,5 +22,9 @@ public class OrderUtils {
             default:
                 return "NO DEFINED";
         }
+    }
+
+    public static String generateDeliveryPin(){
+        return UUID.randomUUID().toString().substring(0,4);
     }
 }

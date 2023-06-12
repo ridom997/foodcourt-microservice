@@ -32,6 +32,12 @@ public class UserValidationUseCase implements IUserValidationServicePort {
     }
 
     @Override
+    public UserBasicInfoDto findClientInfo(Long idClient) {
+        List<UserBasicInfoDto> userBasicInfoDtoList = userValidationComunicationPort.getBasicInfoOfUsers(List.of(idClient));
+        return userBasicInfoDtoList.get(0);
+    }
+
+    @Override
     public Boolean existsRelationWithUserAndIdRestaurant(Long idRestaurant) { //call user microservice and send the incoming jwtToken in the header.
         return userValidationComunicationPort.existsRelationWithUserAndIdRestaurant(idRestaurant);
     }

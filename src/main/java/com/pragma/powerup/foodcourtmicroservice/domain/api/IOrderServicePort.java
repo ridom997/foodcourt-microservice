@@ -22,4 +22,5 @@ public interface IOrderServicePort {
 
     Order changeStatusToDelivered(Long idOrder, String pin, String token);
 
+    Order changeStatusToCancelled(Long idOrder, String token);
 }

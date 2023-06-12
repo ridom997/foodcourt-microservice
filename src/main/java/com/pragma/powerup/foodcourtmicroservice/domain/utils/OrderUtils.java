@@ -19,6 +19,8 @@ public class OrderUtils {
                 return READY_ORDER_STATUS_VALUE;
             case 4:
                 return DELIVERED_ORDER_STATUS_VALUE;
+            case 5:
+                return CANCELLED_ORDER_STATUS_VALUE;
             default:
                 return "NO DEFINED";
         }

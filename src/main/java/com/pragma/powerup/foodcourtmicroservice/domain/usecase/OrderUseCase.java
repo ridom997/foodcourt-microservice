@@ -3,6 +3,7 @@ package com.pragma.powerup.foodcourtmicroservice.domain.usecase;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.*;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.*;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.ClientAlreadyHasAnActiveOrderException;
+import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.GivenPinIsNotCorrectException;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.NoDataFoundException;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.UserHasNoPermissionException;
 import com.pragma.powerup.foodcourtmicroservice.domain.mappers.OrderMapper;
@@ -15,6 +16,7 @@ import com.pragma.powerup.foodcourtmicroservice.domain.utils.OrderUtils;
 import com.pragma.powerup.foodcourtmicroservice.domain.validations.ArgumentValidations;
 import com.pragma.powerup.foodcourtmicroservice.domain.validations.PaginationValidations;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.pragma.powerup.foodcourtmicroservice.configuration.Constants.*;
@@ -92,10 +94,7 @@ public class OrderUseCase implements IOrderServicePort {
     @Override
     public Order assignOrder(Long idOrder, String token) {
         Long idEmployee = validateRoleAndReturnIdUserFromToken(token,EMPLOYEE_ROLE_NAME);
-        Order order = findById(idOrder);
-        Boolean isAnEmployeeOfTheRestaurant = userValidationServicePort.existsRelationWithUserAndIdRestaurant(order.getRestaurant().getId());
-        if(Boolean.FALSE.equals(isAnEmployeeOfTheRestaurant))
-            throw new UserHasNoPermissionException(USER_IS_NOT_AN_EMPLOYEE_OF_THE_RESTAURANT);
+        Order order = getOrderAfterValidateEmployee(idOrder);
         if (order.getStatus() != 1 ||  (order.getIdChef() != null && order.getIdChef() != 0))
             throw new UserHasNoPermissionException("Order is already taken or activated");
         OrderActorsDto clientAndEmployeeInfo = userValidationServicePort.findClientAndEmployeeInfo(order.getIdClient(), idEmployee);
@@ -107,10 +106,7 @@ public class OrderUseCase implements IOrderServicePort {
     @Override
     public OrderAndStatusMessagingDto changeStatusToReady(Long idOrder, String token) {
         Long idEmployee = validateRoleAndReturnIdUserFromToken(token,EMPLOYEE_ROLE_NAME);
-        Order order = findById(idOrder);
-        Boolean isAnEmployeeOfTheRestaurant = userValidationServicePort.existsRelationWithUserAndIdRestaurant(order.getRestaurant().getId());
-        if(Boolean.FALSE.equals(isAnEmployeeOfTheRestaurant))
-            throw new UserHasNoPermissionException(USER_IS_NOT_AN_EMPLOYEE_OF_THE_RESTAURANT);
+        Order order = getOrderAfterValidateEmployee(idOrder);
         if(!order.getStatus().equals(IN_PROGRESS_ORDER_STATUS_INT_VALUE) || !order.getIdChef().equals(idEmployee))
             throw new UserHasNoPermissionException("Order is not in progress or it doesn't belong to the employee");
         OrderActorsDto clientAndEmployeeInfo = userValidationServicePort.findClientAndEmployeeInfo(order.getIdClient(), idEmployee);
@@ -127,5 +123,29 @@ public class OrderUseCase implements IOrderServicePort {
         Long idEmployee = tokenValidationPort.findIdUserFromToken(token);
         tokenValidationPort.verifyRoleInToken(token, role);
         return idEmployee;
+    }
+
+    @Override
+    public Order changeStatusToDelivered(Long idOrder,String pin, String token) {
+        ArgumentValidations.validateString(pin,"Delivery pin");
+        Long idEmployee = validateRoleAndReturnIdUserFromToken(token,EMPLOYEE_ROLE_NAME);
+        Order order = getOrderAfterValidateEmployee(idOrder);
+        if(!order.getStatus().equals(READY_ORDER_STATUS_INT_VALUE) || !order.getIdChef().equals(idEmployee))
+            throw new UserHasNoPermissionException("Order is not in status ready or it doesn't belong to the employee");
+        if(!order.getDeliveryPin().equals(pin))
+            throw new GivenPinIsNotCorrectException();
+        OrderActorsDto clientAndEmployeeInfo = userValidationServicePort.findClientAndEmployeeInfo(order.getIdClient(), idEmployee);
+        order.setStatus(DELIVERED_ORDER_STATUS_INT_VALUE);
+        order.setDateFinished(LocalDateTime.now());
+        order.setDeliveryPin(null);
+        return orderPersistencePort.saveOrderAndTraceability(order,OrderMapper.mapToOrderLogDto(order,READY_ORDER_STATUS_INT_VALUE,clientAndEmployeeInfo));
+    }
+
+    private Order getOrderAfterValidateEmployee(Long idOrder){
+        Order order = findById(idOrder);
+        Boolean isAnEmployeeOfTheRestaurant = userValidationServicePort.existsRelationWithUserAndIdRestaurant(order.getRestaurant().getId());
+        if(Boolean.FALSE.equals(isAnEmployeeOfTheRestaurant))
+            throw new UserHasNoPermissionException(USER_IS_NOT_AN_EMPLOYEE_OF_THE_RESTAURANT);
+        return order;
     }
 }

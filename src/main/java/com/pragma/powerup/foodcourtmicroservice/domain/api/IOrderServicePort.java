@@ -20,4 +20,6 @@ public interface IOrderServicePort {
 
     OrderAndStatusMessagingDto changeStatusToReady(Long idOrder, String token);
 
+    Order changeStatusToDelivered(Long idOrder, String pin, String token);
+
 }

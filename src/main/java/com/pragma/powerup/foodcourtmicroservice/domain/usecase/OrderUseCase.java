@@ -46,8 +46,7 @@ public class OrderUseCase implements IOrderServicePort {
 
     @Override
     public Order saveOrder(NewOrderDto newOrderDto, String token) {
-        Long idClient = tokenValidationPort.findIdUserFromToken(token);
-        tokenValidationPort.verifyRoleInToken(token, CLIENT_ROLE_NAME);
+        Long idClient = validateRoleAndReturnIdUserFromToken(token,CLIENT_ROLE_NAME);
         Restaurant restaurant = restaurantServicePort.findById(newOrderDto.getIdRestaurant());
         if (Boolean.TRUE.equals(orderPersistencePort.existOrderOfClientWithDifferentStatus(idClient, DELIVERED_ORDER_STATUS_INT_VALUE,restaurant.getId())))
             throw new ClientAlreadyHasAnActiveOrderException();
@@ -147,5 +146,22 @@ public class OrderUseCase implements IOrderServicePort {
         if(Boolean.FALSE.equals(isAnEmployeeOfTheRestaurant))
             throw new UserHasNoPermissionException(USER_IS_NOT_AN_EMPLOYEE_OF_THE_RESTAURANT);
         return order;
+    }
+
+    @Override
+    public Order changeStatusToCancelled(Long idOrder, String token) {
+        Long idClient = validateRoleAndReturnIdUserFromToken(token,CLIENT_ROLE_NAME);
+        Order order = findById(idOrder);
+        if(!order.getIdClient().equals(idClient))
+            throw new UserHasNoPermissionException("the order does not belong to the client");
+        if(!order.getStatus().equals(PENDING_ORDER_STATUS_INT_VALUE))
+            throw new UserHasNoPermissionException("Sorry, your order is already in preparation and cannot be cancelled.");
+        order.setStatus(CANCELLED_ORDER_STATUS_INT_VALUE);
+        order.setDateFinished(LocalDateTime.now());
+        //Get info of client, and create a simulation of employee info for traceability purposes.
+        OrderActorsDto clientAndEmployeeInfo = new OrderActorsDto();
+        clientAndEmployeeInfo.setClient(userValidationServicePort.findClientInfo(idClient));
+        clientAndEmployeeInfo.setEmployee(new UserBasicInfoDto(0L,"DEFAULT","NAME","DEFAULT@pragma.com"));
+        return orderPersistencePort.saveOrderAndTraceability(order,OrderMapper.mapToOrderLogDto(order,PENDING_ORDER_STATUS_INT_VALUE,clientAndEmployeeInfo));
     }
 }

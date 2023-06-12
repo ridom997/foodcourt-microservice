@@ -61,4 +61,12 @@ public class OrderHandlerImpl implements IOrderHandler {
                         JwtUtils.getTokenFromRequestHeaders())
         );
     }
+
+    @Override
+    public OrderResponseDto orderCancelled(Long idOrder) {
+        return orderResponseMapper.toOrderResponseDto(
+                orderServicePort.changeStatusToCancelled(idOrder,
+                        JwtUtils.getTokenFromRequestHeaders())
+        );
+    }
 }

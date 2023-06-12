@@ -57,4 +57,16 @@ class UserValidationUseCaseTest {
 
         assertThat(result).isFalse();
     }
+
+    @Test
+    void findClientInfoTest_successfully(){
+        Long idClient = 1L;
+        List<UserBasicInfoDto> userBasicInfoDtos = List.of(new UserBasicInfoDto(idClient, "name", "phone", "mail"));
+        when(mockUserValidationComunicationPort.getBasicInfoOfUsers(List.of(idClient))).thenReturn(userBasicInfoDtos);
+
+        UserBasicInfoDto clientInfo = userValidationUseCaseUnderTest.findClientInfo(idClient);
+
+        assertEquals(idClient,clientInfo.getId());
+        verify(mockUserValidationComunicationPort,times(1)).getBasicInfoOfUsers(anyList());
+    }
 }

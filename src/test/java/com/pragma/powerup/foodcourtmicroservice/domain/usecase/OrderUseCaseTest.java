@@ -404,7 +404,7 @@ class OrderUseCaseTest {
 
 
     @Test
-    void changeStatusToReadyDelivered_successfully(){
+    void changeStatusToDelivered_successfully(){
         Long idOrder = 1L;
         String token = "valid_token";
         String pin = "aadd";
@@ -442,7 +442,7 @@ class OrderUseCaseTest {
     }
 
     @Test
-    void changeStatusToReadyDelivered_userHasNoPermissionException(){
+    void changeStatusToDelivered_userHasNoPermissionException(){
         Long idOrder = 1L;
         String token = "valid_token";
         String pin = "aadd";
@@ -473,7 +473,7 @@ class OrderUseCaseTest {
     }
 
     @Test
-    void changeStatusToReadyDelivered_givenPinIsNotCorrectException(){
+    void changeStatusToDelivered_givenPinIsNotCorrectException(){
         Long idOrder = 1L;
         String token = "valid_token";
         String pin = "aadd";
@@ -502,5 +502,79 @@ class OrderUseCaseTest {
         verify(tokenValidationPort).findIdUserFromToken(token);
         verify(orderPersistencePort).findById(idOrder);
         verify(userValidationServicePort).existsRelationWithUserAndIdRestaurant(order.getRestaurant().getId());
+    }
+
+    @Test
+    void changeStatusToCancelled_successfully(){
+        Long idOrder = 1L;
+        String token = "valid_token";
+        Long idClient = 2L;
+        UserBasicInfoDto clientBasicInfo = new UserBasicInfoDto(idClient, "a", "b", "c");
+
+        Order order = new Order();
+        order.setId(idOrder);
+        order.setStatus(PENDING_ORDER_STATUS_INT_VALUE);
+        order.setRestaurant(new Restaurant(1L));
+        order.setIdClient(idClient);
+
+        when(tokenValidationPort.findIdUserFromToken(token)).thenReturn(idClient);
+        when(orderPersistencePort.findById(idOrder)).thenReturn(order);
+        when(userValidationServicePort.findClientInfo(idClient)).thenReturn(clientBasicInfo);
+        Order orderSaved = new Order();
+        orderSaved.setStatus(CANCELLED_ORDER_STATUS_INT_VALUE);
+        when(orderPersistencePort.saveOrderAndTraceability(any(Order.class), any(OrderLogDto.class))).thenReturn(orderSaved);
+
+        //act
+        Order result = orderUseCase.changeStatusToCancelled(idOrder, token);
+
+        assertEquals(CANCELLED_ORDER_STATUS_INT_VALUE,result.getStatus());
+        verify(tokenValidationPort).findIdUserFromToken(token);
+        verify(orderPersistencePort).findById(idOrder);
+        verify(userValidationServicePort).findClientInfo(idClient);
+        verify(orderPersistencePort).saveOrderAndTraceability(any(Order.class), any(OrderLogDto.class));
+    }
+
+    @Test
+    void changeStatusToCancelled_orderIsNotOfClient(){
+        Long idOrder = 1L;
+        String token = "valid_token";
+        Long idClient = 2L;
+
+        Order order = new Order();
+        order.setId(idOrder);
+        order.setStatus(PENDING_ORDER_STATUS_INT_VALUE);
+        order.setRestaurant(new Restaurant(1L));
+        order.setIdClient(3L);
+
+        when(tokenValidationPort.findIdUserFromToken(token)).thenReturn(idClient);
+        when(orderPersistencePort.findById(idOrder)).thenReturn(order);
+
+        //act
+        assertThrows(UserHasNoPermissionException.class, () -> orderUseCase.changeStatusToCancelled(idOrder, token));
+
+        verify(tokenValidationPort).findIdUserFromToken(token);
+        verify(orderPersistencePort).findById(idOrder);
+    }
+
+    @Test
+    void changeStatusToCancelled_orderIsNotPending(){
+        Long idOrder = 1L;
+        String token = "valid_token";
+        Long idClient = 2L;
+
+        Order order = new Order();
+        order.setId(idOrder);
+        order.setStatus(IN_PROGRESS_ORDER_STATUS_INT_VALUE);
+        order.setRestaurant(new Restaurant(1L));
+        order.setIdClient(idClient);
+
+        when(tokenValidationPort.findIdUserFromToken(token)).thenReturn(idClient);
+        when(orderPersistencePort.findById(idOrder)).thenReturn(order);
+
+        //act
+        assertThrows(UserHasNoPermissionException.class, () -> orderUseCase.changeStatusToCancelled(idOrder, token));
+
+        verify(tokenValidationPort).findIdUserFromToken(token);
+        verify(orderPersistencePort).findById(idOrder);
     }
 }

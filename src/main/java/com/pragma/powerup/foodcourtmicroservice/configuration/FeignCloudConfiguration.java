@@ -32,7 +32,7 @@ public class FeignCloudConfiguration implements RequestInterceptor {
 
     @Override
     public void apply(RequestTemplate template) {
-        if(template.url().endsWith("/get-basic-info")){
+        if(template.url().endsWith("/get-basic-info") || template.url().endsWith("/log")){
             template.header(Constants.AUTHORIZATION_HEADER, "Bearer " +  tokenAdmin); //set admin jwt token
         }else{
             template.header(Constants.AUTHORIZATION_HEADER, getBearerTokenHeader()); //set current jwt token

@@ -71,7 +71,7 @@ public class OrderController {
                             content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
                     @ApiResponse(responseCode = "401", description = "Unauthorized request",
                             content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
-                    @ApiResponse(responseCode = "403", description = "User who made the request is not an employee of the given restaurant or order i´snt in progress or it is not the chef of the order",
+                    @ApiResponse(responseCode = "403", description = "User who made the request is not an employee of the given restaurant or isn´t the chef of the order or order isn't in progress",
                             content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
                     @ApiResponse(responseCode = "404", description = "Employee does´nt have idRestaurant associated or no order found",
                             content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),

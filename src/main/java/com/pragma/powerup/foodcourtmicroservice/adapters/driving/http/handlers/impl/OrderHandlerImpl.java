@@ -52,4 +52,13 @@ public class OrderHandlerImpl implements IOrderHandler {
             responseDto.getOrder().setDeliveryPin(null);
         return responseDto;
     }
+
+    @Override
+    public OrderResponseDto orderDelivered(Long idOrder, String pin) {
+        return orderResponseMapper.toOrderResponseDto(
+                orderServicePort.changeStatusToDelivered(idOrder,
+                        pin,
+                        JwtUtils.getTokenFromRequestHeaders())
+        );
+    }
 }

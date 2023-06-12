@@ -13,4 +13,6 @@ public interface IOrderHandler {
 
     OrderResponseDto assignOrder(Long idOrder);
     OrderAndStatusMessagingResponseDto orderReady(Long idOrder);
+
+    OrderResponseDto orderDelivered(Long idOrder, String pin);
 }

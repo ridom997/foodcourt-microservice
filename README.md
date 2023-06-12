@@ -114,10 +114,14 @@ En caso de usar un endpoint sin la autorización necesaria saldrá de respuesta 
 + Para consumir el endpoint "/orders/{idOrder}/assignEmployee" es necesario estar autenticado como empleado (employee). Tambien es necesario tener corriendo el microservicio de usuarios y de [trazabilidad](https://github.com/ridom997/traceability-microservice)
 ### HU14:
 + Es necesario ejecutar del data.sql la seccion "-- HU --14"
-+ Se hizo el endpoint "/orders/{idOrder}/ready" el cual es necesario estar autenticado como empleado del restaurante.
++ Se hizo el endpoint "/orders/{idOrder}/ready" el cual es necesario estar autenticado como empleado del restaurante y ser el que gestionó en un principio la orden.
 + Para que este endpoint funcione correctamente es necesario tener activo los microservicios (user, traceability y messaging).
 + Solo se pueden cambiar a estado "READY" las ordenes que es esten en estado "IN PROGRESS"
 + En caso de que exista un fallo en el envio de sms al cliente, se retornará el PIN de entrega (deliveryPin) en la respuesta del endpoint.
+### HU15:
++ Se hizo el endpoint "/orders/{idOrder}/deliver" el cual es necesario estar autenticado como empleado del restaurante y ser el que gestionó en un principio la orden
++ Para que este endpoint funcione correctamente es necesario tener activo los microservicios (user y traceability).
++ Solo se pueden cambiar a estado "DELIVERED" las ordenes que es esten en estado "READY"
 <!-- ROADMAP -->
 ## Tests
 

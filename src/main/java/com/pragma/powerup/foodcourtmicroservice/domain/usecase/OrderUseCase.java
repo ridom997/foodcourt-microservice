@@ -111,8 +111,8 @@ public class OrderUseCase implements IOrderServicePort {
         Boolean isAnEmployeeOfTheRestaurant = userValidationServicePort.existsRelationWithUserAndIdRestaurant(order.getRestaurant().getId());
         if(Boolean.FALSE.equals(isAnEmployeeOfTheRestaurant))
             throw new UserHasNoPermissionException(USER_IS_NOT_AN_EMPLOYEE_OF_THE_RESTAURANT);
-        if(!order.getStatus().equals(IN_PROGRESS_ORDER_STATUS_INT_VALUE))
-            throw new UserHasNoPermissionException("Order is not in progress");
+        if(!order.getStatus().equals(IN_PROGRESS_ORDER_STATUS_INT_VALUE) || !order.getIdChef().equals(idEmployee))
+            throw new UserHasNoPermissionException("Order is not in progress or it doesn't belong to the employee");
         OrderActorsDto clientAndEmployeeInfo = userValidationServicePort.findClientAndEmployeeInfo(order.getIdClient(), idEmployee);
         order.setStatus(READY_ORDER_STATUS_INT_VALUE);
         String deliveryPin = OrderUtils.generateDeliveryPin();

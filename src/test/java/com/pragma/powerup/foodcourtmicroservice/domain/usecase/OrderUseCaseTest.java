@@ -317,6 +317,7 @@ class OrderUseCaseTest {
         order.setStatus(IN_PROGRESS_ORDER_STATUS_INT_VALUE);
         order.setRestaurant(new Restaurant(1L));
         order.setIdClient(idClient);
+        order.setIdChef(1L);
 
         when(tokenValidationPort.findIdUserFromToken(token)).thenReturn(idEmployee);
         when(orderPersistencePort.findById(idOrder)).thenReturn(order);

@@ -44,6 +44,7 @@ public class Constants {
 
     public static final String OWNER_ROLE_NAME = "ROLE_OWNER";
     public static final String CLIENT_ROLE_NAME = "ROLE_CLIENT";
+    public static final String CLIENT_VALUE = "CLIENT";
     public static final String EMPLOYEE_ROLE_NAME = "ROLE_EMPLOYEE";
 
     public static final String USER_PROVIDED_DOES_MATCH_WITH_USER_TOKEN_MESSAGE = "User in request doesn't match with user in token";
@@ -60,11 +61,13 @@ public class Constants {
     public static final Integer IN_PROGRESS_ORDER_STATUS_INT_VALUE = 2;
     public static final Integer READY_ORDER_STATUS_INT_VALUE = 3;
     public static final Integer DELIVERED_ORDER_STATUS_INT_VALUE = 4;
+    public static final Integer CANCELLED_ORDER_STATUS_INT_VALUE = 5;
 
     public static final String PENDING_ORDER_STATUS_VALUE = "PENDING";
     public static final String IN_PROGRESS_ORDER_STATUS_VALUE = "IN PROGRESS";
     public static final String READY_ORDER_STATUS_VALUE = "READY";
     public static final String DELIVERED_ORDER_STATUS_VALUE = "DELIVERED";
+    public static final String CANCELLED_ORDER_STATUS_VALUE = "CANCELLED";
     public static final String ID_RESTAURANT_STRING_VALUE = "idRestaurant";
     public static final String ORDER_STATUS_STRING_VALUE = "Order status";
     public static final String ORDER_READY_SMS_BODY_BASE_MESSAGE = "Hello, your order is READY! your PIN is: ";

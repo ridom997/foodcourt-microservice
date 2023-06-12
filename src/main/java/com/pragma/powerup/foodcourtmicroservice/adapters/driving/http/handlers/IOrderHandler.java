@@ -15,4 +15,5 @@ public interface IOrderHandler {
     OrderAndStatusMessagingResponseDto orderReady(Long idOrder);
 
     OrderResponseDto orderDelivered(Long idOrder, String pin);
+    OrderResponseDto orderCancelled(Long idOrder);
 }

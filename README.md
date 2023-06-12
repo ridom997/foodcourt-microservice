@@ -122,6 +122,10 @@ En caso de usar un endpoint sin la autorización necesaria saldrá de respuesta 
 + Se hizo el endpoint "/orders/{idOrder}/deliver" el cual es necesario estar autenticado como empleado del restaurante y ser el que gestionó en un principio la orden
 + Para que este endpoint funcione correctamente es necesario tener activo los microservicios (user y traceability).
 + Solo se pueden cambiar a estado "DELIVERED" las ordenes que es esten en estado "READY"
+### HU16:
++ Se hizo el endpoint "/orders/{idOrder}/cancel" el cual es necesario estar autenticado como el cliente que hizo el pedido (order).
++ Para que este endpoint funcione correctamente es necesario tener activo los microservicios (user y traceability).
++ Solo se pueden cambiar a estado "CANCELLED" las ordenes que es esten en estado "PENDING"
 <!-- ROADMAP -->
 ## Tests
 

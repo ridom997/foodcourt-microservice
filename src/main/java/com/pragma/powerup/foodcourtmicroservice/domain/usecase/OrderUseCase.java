@@ -1,21 +1,17 @@
 package com.pragma.powerup.foodcourtmicroservice.domain.usecase;
 
-import com.pragma.powerup.foodcourtmicroservice.domain.api.IDishServicePort;
-import com.pragma.powerup.foodcourtmicroservice.domain.api.IOrderDishServicePort;
-import com.pragma.powerup.foodcourtmicroservice.domain.api.IOrderServicePort;
-import com.pragma.powerup.foodcourtmicroservice.domain.api.IRestaurantServicePort;
-import com.pragma.powerup.foodcourtmicroservice.domain.dto.DishAndAmountDto;
-import com.pragma.powerup.foodcourtmicroservice.domain.dto.NewOrderDto;
-import com.pragma.powerup.foodcourtmicroservice.domain.dto.OrderWithDetailDto;
+import com.pragma.powerup.foodcourtmicroservice.domain.api.*;
+import com.pragma.powerup.foodcourtmicroservice.domain.dto.*;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.ClientAlreadyHasAnActiveOrderException;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.NoDataFoundException;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.UserHasNoPermissionException;
 import com.pragma.powerup.foodcourtmicroservice.domain.mappers.OrderMapper;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Order;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Restaurant;
+import com.pragma.powerup.foodcourtmicroservice.domain.spi.IMessagingCommunicationPort;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.IOrderPersistencePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.ITokenValidationPort;
-import com.pragma.powerup.foodcourtmicroservice.domain.spi.IUserValidationComunicationPort;
+import com.pragma.powerup.foodcourtmicroservice.domain.utils.OrderUtils;
 import com.pragma.powerup.foodcourtmicroservice.domain.validations.ArgumentValidations;
 import com.pragma.powerup.foodcourtmicroservice.domain.validations.PaginationValidations;
 
@@ -32,16 +28,18 @@ public class OrderUseCase implements IOrderServicePort {
     private final IRestaurantServicePort restaurantServicePort;
 
     private final IOrderDishServicePort orderDishServicePort;
+    private final IMessagingCommunicationPort messagingCommunicationPort;
     
-    private final IUserValidationComunicationPort userValidationComunicationPort;
+    private final IUserValidationServicePort userValidationServicePort;
 
-    public OrderUseCase(IOrderPersistencePort orderPersistencePort, ITokenValidationPort tokenValidationPort, IDishServicePort dishServicePort, IRestaurantServicePort restaurantServicePort, IOrderDishServicePort orderDishServicePort, IUserValidationComunicationPort userValidationComunicationPort) {
+    public OrderUseCase(IOrderPersistencePort orderPersistencePort, ITokenValidationPort tokenValidationPort, IDishServicePort dishServicePort, IRestaurantServicePort restaurantServicePort, IOrderDishServicePort orderDishServicePort, IMessagingCommunicationPort messagingCommunicationPort, IUserValidationServicePort userValidationServicePort) {
         this.orderPersistencePort = orderPersistencePort;
         this.tokenValidationPort = tokenValidationPort;
         this.dishServicePort = dishServicePort;
         this.restaurantServicePort = restaurantServicePort;
         this.orderDishServicePort = orderDishServicePort;
-        this.userValidationComunicationPort = userValidationComunicationPort;
+        this.messagingCommunicationPort = messagingCommunicationPort;
+        this.userValidationServicePort = userValidationServicePort;
     }
 
     @Override
@@ -80,7 +78,7 @@ public class OrderUseCase implements IOrderServicePort {
         PaginationValidations.validatePageAndSizePage(page,sizePage);
         ArgumentValidations.validateObject(idRestaurant, ID_RESTAURANT_STRING_VALUE);
         ArgumentValidations.validateObject(status,ORDER_STATUS_STRING_VALUE);
-        Boolean isAnEmployeeOfTheRestaurant = userValidationComunicationPort.existsRelationWithUserAndIdRestaurant(idRestaurant);
+        Boolean isAnEmployeeOfTheRestaurant = userValidationServicePort.existsRelationWithUserAndIdRestaurant(idRestaurant);
         if(Boolean.FALSE.equals(isAnEmployeeOfTheRestaurant))
             throw new UserHasNoPermissionException(USER_IS_NOT_AN_EMPLOYEE_OF_THE_RESTAURANT);
         List<Order> ordersByRestaurantAndStatus = orderPersistencePort.getOrdersByRestaurantAndStatus(page, sizePage, idRestaurant, status);
@@ -93,18 +91,41 @@ public class OrderUseCase implements IOrderServicePort {
 
     @Override
     public Order assignOrder(Long idOrder, String token) {
-        Long idEmployee = tokenValidationPort.findIdUserFromToken(token);
-        tokenValidationPort.verifyRoleInToken(token, EMPLOYEE_ROLE_NAME);
+        Long idEmployee = validateRoleAndReturnIdUserFromToken(token,EMPLOYEE_ROLE_NAME);
         Order order = findById(idOrder);
-        Boolean isAnEmployeeOfTheRestaurant = userValidationComunicationPort.existsRelationWithUserAndIdRestaurant(order.getRestaurant().getId());
+        Boolean isAnEmployeeOfTheRestaurant = userValidationServicePort.existsRelationWithUserAndIdRestaurant(order.getRestaurant().getId());
         if(Boolean.FALSE.equals(isAnEmployeeOfTheRestaurant))
             throw new UserHasNoPermissionException(USER_IS_NOT_AN_EMPLOYEE_OF_THE_RESTAURANT);
         if (order.getStatus() != 1 ||  (order.getIdChef() != null && order.getIdChef() != 0))
             throw new UserHasNoPermissionException("Order is already taken or activated");
+        OrderActorsDto clientAndEmployeeInfo = userValidationServicePort.findClientAndEmployeeInfo(order.getIdClient(), idEmployee);
         order.setIdChef(idEmployee);
-        order.setStatus(2); //in progress
-        return orderPersistencePort.saveOrderAndTraceability(order,OrderMapper.mapToOrderLogDto(order,idEmployee,1));
+        order.setStatus(IN_PROGRESS_ORDER_STATUS_INT_VALUE);
+        return orderPersistencePort.saveOrderAndTraceability(order,OrderMapper.mapToOrderLogDto(order,PENDING_ORDER_STATUS_INT_VALUE,clientAndEmployeeInfo));
     }
 
+    @Override
+    public OrderAndStatusMessagingDto changeStatusToReady(Long idOrder, String token) {
+        Long idEmployee = validateRoleAndReturnIdUserFromToken(token,EMPLOYEE_ROLE_NAME);
+        Order order = findById(idOrder);
+        Boolean isAnEmployeeOfTheRestaurant = userValidationServicePort.existsRelationWithUserAndIdRestaurant(order.getRestaurant().getId());
+        if(Boolean.FALSE.equals(isAnEmployeeOfTheRestaurant))
+            throw new UserHasNoPermissionException(USER_IS_NOT_AN_EMPLOYEE_OF_THE_RESTAURANT);
+        if(!order.getStatus().equals(IN_PROGRESS_ORDER_STATUS_INT_VALUE) || !order.getIdChef().equals(idEmployee))
+            throw new UserHasNoPermissionException("Order is not in progress or it doesn't belong to the employee");
+        OrderActorsDto clientAndEmployeeInfo = userValidationServicePort.findClientAndEmployeeInfo(order.getIdClient(), idEmployee);
+        order.setStatus(READY_ORDER_STATUS_INT_VALUE);
+        String deliveryPin = OrderUtils.generateDeliveryPin();
+        order.setDeliveryPin(deliveryPin);
+        return new OrderAndStatusMessagingDto(
+                orderPersistencePort.saveOrderAndTraceability(order, OrderMapper.mapToOrderLogDto(order,IN_PROGRESS_ORDER_STATUS_INT_VALUE,clientAndEmployeeInfo)),
+                messagingCommunicationPort.sendSms(clientAndEmployeeInfo.getClient().getPhone(), ORDER_READY_SMS_BODY_BASE_MESSAGE+deliveryPin)
+        );
+    }
 
+    private Long validateRoleAndReturnIdUserFromToken(String token, String role){
+        Long idEmployee = tokenValidationPort.findIdUserFromToken(token);
+        tokenValidationPort.verifyRoleInToken(token, role);
+        return idEmployee;
+    }
 }

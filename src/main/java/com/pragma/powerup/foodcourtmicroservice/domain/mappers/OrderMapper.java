@@ -1,5 +1,6 @@
 package com.pragma.powerup.foodcourtmicroservice.domain.mappers;
 
+import com.pragma.powerup.foodcourtmicroservice.domain.dto.OrderActorsDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.OrderLogDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Order;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Restaurant;
@@ -23,17 +24,17 @@ public class OrderMapper {
         return order;
     }
 
-    public static OrderLogDto mapToOrderLogDto(Order order, Long idEmployee, Integer previousStatus){
+    public static OrderLogDto mapToOrderLogDto(Order order, Integer previousStatus, OrderActorsDto orderActorsDto){
         LocalDateTime currentDateTime = LocalDateTime.now(ZoneId.of("UTC-5"));
         OrderLogDto orderLogDto = new OrderLogDto();
         orderLogDto.setIdOrder(order.getId());
-        orderLogDto.setIdClient(order.getIdClient());
-        orderLogDto.setMailClient("client@correo.com");
+        orderLogDto.setIdClient(orderActorsDto.getClient().getId());
+        orderLogDto.setMailClient(orderActorsDto.getClient().getMail());
         orderLogDto.setDate(currentDateTime);
         orderLogDto.setPreviousStatus(previousStatus);
         orderLogDto.setNewStatus(order.getStatus());
-        orderLogDto.setIdEmployee(idEmployee);
-        orderLogDto.setMailEmployee("employee@correo.com");
+        orderLogDto.setIdEmployee(orderActorsDto.getEmployee().getId());
+        orderLogDto.setMailEmployee(orderActorsDto.getEmployee().getMail());
         return orderLogDto;
     }
 }

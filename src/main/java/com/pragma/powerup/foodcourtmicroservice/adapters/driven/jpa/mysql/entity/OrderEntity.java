@@ -36,6 +36,9 @@ public class OrderEntity {
     @Column(name = "id_chef", nullable = false)
     private Long idChef;
 
+    @Column(name = "delivery_pin")
+    private String deliveryPin;
+
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_restaurant", nullable = false)

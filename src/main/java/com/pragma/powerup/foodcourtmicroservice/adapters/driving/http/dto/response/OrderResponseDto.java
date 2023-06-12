@@ -1,5 +1,6 @@
 package com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,4 +28,7 @@ public class OrderResponseDto {
     private Long idRestaurant;
     @Schema(example = "Food Pragma")
     private String nameRestaurant;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL) //do not show this variable in the response if it's null.
+    private String deliveryPin;
 }

@@ -3,6 +3,7 @@ package com.pragma.powerup.foodcourtmicroservice.domain.usecase;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IDishServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IOrderDishServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IRestaurantServicePort;
+import com.pragma.powerup.foodcourtmicroservice.domain.api.IUserValidationServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.*;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.ClientAlreadyHasAnActiveOrderException;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.FailValidatingRequiredVariableException;
@@ -10,10 +11,10 @@ import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.NoDataFoundExc
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.UserHasNoPermissionException;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Order;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Restaurant;
+import com.pragma.powerup.foodcourtmicroservice.domain.spi.IMessagingCommunicationPort;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.IOrderPersistencePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.ITokenValidationPort;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.ITraceabilityCommunicationPort;
-import com.pragma.powerup.foodcourtmicroservice.domain.spi.IUserValidationComunicationPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,7 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static com.pragma.powerup.foodcourtmicroservice.configuration.Constants.DELIVERED_ORDER_STATUS_INT_VALUE;
+import static com.pragma.powerup.foodcourtmicroservice.configuration.Constants.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
@@ -47,7 +48,10 @@ class OrderUseCaseTest {
     private ITraceabilityCommunicationPort traceabilityCommunicationPort;
 
     @Mock
-    private IUserValidationComunicationPort userValidationComunicationPort;
+    private IUserValidationServicePort userValidationServicePort;
+
+    @Mock
+    private IMessagingCommunicationPort messagingCommunicationPort;
 
     @InjectMocks
     private OrderUseCase orderUseCase;
@@ -181,14 +185,14 @@ class OrderUseCaseTest {
         Integer sizePage = 10;
         String token = "token";
         Boolean isAnEmployeeOfTheRestaurant = false;
-        when(userValidationComunicationPort.existsRelationWithUserAndIdRestaurant(idRestaurant)).thenReturn(isAnEmployeeOfTheRestaurant);
+        when(userValidationServicePort.existsRelationWithUserAndIdRestaurant(idRestaurant)).thenReturn(isAnEmployeeOfTheRestaurant);
 
         assertThrows(UserHasNoPermissionException.class,
                 () -> orderUseCase.findAllPagedOrdersByIdStatus(idRestaurant, status, page, sizePage, token)
         );
 
         verify(tokenValidationPort, times(1)).verifyRoleInToken(token, "ROLE_EMPLOYEE");
-        verify(userValidationComunicationPort, times(1)).existsRelationWithUserAndIdRestaurant(idRestaurant);
+        verify(userValidationServicePort, times(1)).existsRelationWithUserAndIdRestaurant(idRestaurant);
         verify(orderPersistencePort, never()).getOrdersByRestaurantAndStatus(page, sizePage, idRestaurant, status);
     }
 
@@ -200,7 +204,7 @@ class OrderUseCaseTest {
         Integer sizePage = 10;
         String token = "token";
         when(orderPersistencePort.getOrdersByRestaurantAndStatus(page, sizePage, idRestaurant, status)).thenReturn(List.of());
-        when(userValidationComunicationPort.existsRelationWithUserAndIdRestaurant(idRestaurant)).thenReturn(true);
+        when(userValidationServicePort.existsRelationWithUserAndIdRestaurant(idRestaurant)).thenReturn(true);
 
         NoDataFoundException exception = assertThrows(NoDataFoundException.class, () -> {
             orderUseCase.findAllPagedOrdersByIdStatus(idRestaurant, status, page, sizePage, token);
@@ -208,7 +212,7 @@ class OrderUseCaseTest {
 
         assertEquals("No orders found", exception.getMessage());
         verify(tokenValidationPort, times(1)).verifyRoleInToken(token, "ROLE_EMPLOYEE");
-        verify(userValidationComunicationPort, times(1)).existsRelationWithUserAndIdRestaurant(idRestaurant);
+        verify(userValidationServicePort, times(1)).existsRelationWithUserAndIdRestaurant(idRestaurant);
         verify(orderPersistencePort, times(1)).getOrdersByRestaurantAndStatus(page, sizePage, idRestaurant, status);
     }
 
@@ -221,14 +225,14 @@ class OrderUseCaseTest {
         String token = "token";
         List<Order> orderList = List.of(new Order());
         when(orderPersistencePort.getOrdersByRestaurantAndStatus(page, sizePage, idRestaurant, status)).thenReturn(orderList);
-        when(userValidationComunicationPort.existsRelationWithUserAndIdRestaurant(idRestaurant)).thenReturn(true);
+        when(userValidationServicePort.existsRelationWithUserAndIdRestaurant(idRestaurant)).thenReturn(true);
 
 
         List<OrderWithDetailDto> allPagedOrdersByIdStatus = orderUseCase.findAllPagedOrdersByIdStatus(idRestaurant, status, page, sizePage, token);
 
 
         verify(tokenValidationPort, times(1)).verifyRoleInToken(token, "ROLE_EMPLOYEE");
-        verify(userValidationComunicationPort, times(1)).existsRelationWithUserAndIdRestaurant(idRestaurant);
+        verify(userValidationServicePort, times(1)).existsRelationWithUserAndIdRestaurant(idRestaurant);
         verify(orderPersistencePort, times(1)).getOrdersByRestaurantAndStatus(page, sizePage, idRestaurant, status);
     }
 
@@ -239,13 +243,16 @@ class OrderUseCaseTest {
         String token = "token";
         Order order = new Order();
         order.setStatus(1);
+        order.setIdClient(2L);
         order.setRestaurant(new Restaurant());
         Order orderSaved = new Order();
         orderSaved.setStatus(2);
         orderSaved.setIdChef(1L);
+        UserBasicInfoDto userBasicInfoDto = new UserBasicInfoDto(1L,"user name", "asdas", "mail");
         when(tokenValidationPort.findIdUserFromToken(token)).thenReturn(1L);
         when(orderPersistencePort.findById(idOrder)).thenReturn(order);
-        when(userValidationComunicationPort.existsRelationWithUserAndIdRestaurant(order.getRestaurant().getId())).thenReturn(true);
+        when(userValidationServicePort.existsRelationWithUserAndIdRestaurant(order.getRestaurant().getId())).thenReturn(true);
+        when(userValidationServicePort.findClientAndEmployeeInfo(anyLong(),anyLong())).thenReturn(new OrderActorsDto(userBasicInfoDto,userBasicInfoDto));
         when(orderPersistencePort.saveOrderAndTraceability(any(Order.class),any(OrderLogDto.class))).thenReturn(orderSaved);
 
         Order orderResult = orderUseCase.assignOrder(idOrder, token);
@@ -266,7 +273,7 @@ class OrderUseCaseTest {
         orderSaved.setIdChef(1L);
         when(tokenValidationPort.findIdUserFromToken(token)).thenReturn(1L);
         when(orderPersistencePort.findById(idOrder)).thenReturn(order);
-        when(userValidationComunicationPort.existsRelationWithUserAndIdRestaurant(order.getRestaurant().getId())).thenReturn(false);
+        when(userValidationServicePort.existsRelationWithUserAndIdRestaurant(order.getRestaurant().getId())).thenReturn(false);
 
         assertThrows(UserHasNoPermissionException.class, () -> orderUseCase.assignOrder(idOrder, token));
     }
@@ -283,7 +290,7 @@ class OrderUseCaseTest {
         orderSaved.setIdChef(1L);
         when(tokenValidationPort.findIdUserFromToken(token)).thenReturn(1L);
         when(orderPersistencePort.findById(idOrder)).thenReturn(order);
-        when(userValidationComunicationPort.existsRelationWithUserAndIdRestaurant(order.getRestaurant().getId())).thenReturn(true);
+        when(userValidationServicePort.existsRelationWithUserAndIdRestaurant(order.getRestaurant().getId())).thenReturn(true);
 
         assertThrows(UserHasNoPermissionException.class, () -> orderUseCase.assignOrder(idOrder, token));
     }
@@ -293,6 +300,109 @@ class OrderUseCaseTest {
         Long idOrder = 1L;
         when(orderPersistencePort.findById(idOrder)).thenReturn(null);
         assertThrows(NoDataFoundException.class, () -> orderUseCase.findById(idOrder));
+    }
+
+    @Test
+    void changeStatusToReadyTest_succesfully(){
+        Long idOrder = 1L;
+        String token = "valid_token";
+        Long idEmployee = 1L;
+        Long idClient = 2L;
+        OrderActorsDto orderActorsDto = new OrderActorsDto();
+        orderActorsDto.setClient(new UserBasicInfoDto(idClient,"a","b","c"));
+        orderActorsDto.setEmployee(new UserBasicInfoDto(idEmployee,"a","b","c"));
+
+        Order order = new Order();
+        order.setId(idOrder);
+        order.setStatus(IN_PROGRESS_ORDER_STATUS_INT_VALUE);
+        order.setRestaurant(new Restaurant(1L));
+        order.setIdClient(idClient);
+        order.setIdChef(1L);
+
+        when(tokenValidationPort.findIdUserFromToken(token)).thenReturn(idEmployee);
+        when(orderPersistencePort.findById(idOrder)).thenReturn(order);
+        when(userValidationServicePort.existsRelationWithUserAndIdRestaurant(order.getRestaurant().getId())).thenReturn(true);
+        when(userValidationServicePort.findClientAndEmployeeInfo(idClient,idEmployee)).thenReturn(orderActorsDto);
+        Order orderSaved = new Order();
+        orderSaved.setStatus(READY_ORDER_STATUS_INT_VALUE);
+        when(orderPersistencePort.saveOrderAndTraceability(any(Order.class), any(OrderLogDto.class))).thenReturn(orderSaved);
+        when(messagingCommunicationPort.sendSms(anyString(),anyString())).thenReturn(false);
+
+        //act
+        OrderAndStatusMessagingDto result = orderUseCase.changeStatusToReady(idOrder, token);
+
+        assertEquals(READY_ORDER_STATUS_INT_VALUE,result.getOrder().getStatus());
+        verify(tokenValidationPort).findIdUserFromToken(token);
+        verify(orderPersistencePort).findById(idOrder);
+        verify(userValidationServicePort).existsRelationWithUserAndIdRestaurant(order.getRestaurant().getId());
+        verify(userValidationServicePort).findClientAndEmployeeInfo(idClient, idEmployee);
+        verify(orderPersistencePort).saveOrderAndTraceability(any(Order.class), any(OrderLogDto.class));
+        verify(messagingCommunicationPort).sendSms(anyString(), anyString());
+
+    }
+
+    @Test
+    void changeStatusToReadyTest_isNotAnEmployeeOfTheRestaurant(){
+        Long idOrder = 1L;
+        String token = "valid_token";
+        Long idEmployee = 1L;
+        Long idClient = 2L;
+        OrderActorsDto orderActorsDto = new OrderActorsDto();
+        orderActorsDto.setClient(new UserBasicInfoDto(idClient,"a","b","c"));
+        orderActorsDto.setEmployee(new UserBasicInfoDto(idEmployee,"a","b","c"));
+
+        Order order = new Order();
+        order.setId(idOrder);
+        order.setStatus(IN_PROGRESS_ORDER_STATUS_INT_VALUE);
+        order.setRestaurant(new Restaurant(1L));
+        order.setIdClient(idClient);
+
+        when(tokenValidationPort.findIdUserFromToken(token)).thenReturn(idEmployee);
+        when(orderPersistencePort.findById(idOrder)).thenReturn(order);
+        when(userValidationServicePort.existsRelationWithUserAndIdRestaurant(order.getRestaurant().getId())).thenReturn(false);
+
+
+        //act
+        assertThrows(UserHasNoPermissionException.class ,() -> orderUseCase.changeStatusToReady(idOrder, token));
+
+        verify(tokenValidationPort).findIdUserFromToken(token);
+        verify(orderPersistencePort).findById(idOrder);
+        verify(userValidationServicePort).existsRelationWithUserAndIdRestaurant(order.getRestaurant().getId());
+        verify(userValidationServicePort, times(0)).findClientAndEmployeeInfo(idClient, idEmployee);
+        verify(orderPersistencePort, times(0)).saveOrderAndTraceability(any(Order.class), any(OrderLogDto.class));
+        verify(messagingCommunicationPort, times(0)).sendSms(anyString(), anyString());
+
+    }
+
+    @Test
+    void changeStatusToReadyTest_orderIsNotInProgress(){
+        Long idOrder = 1L;
+        String token = "valid_token";
+        Long idEmployee = 1L;
+        Long idClient = 2L;
+        OrderActorsDto orderActorsDto = new OrderActorsDto();
+        orderActorsDto.setClient(new UserBasicInfoDto(idClient,"a","b","c"));
+        orderActorsDto.setEmployee(new UserBasicInfoDto(idEmployee,"a","b","c"));
+
+        Order order = new Order();
+        order.setId(idOrder);
+        order.setStatus(1);
+        order.setRestaurant(new Restaurant(1L));
+        order.setIdClient(idClient);
+
+        when(tokenValidationPort.findIdUserFromToken(token)).thenReturn(idEmployee);
+        when(orderPersistencePort.findById(idOrder)).thenReturn(order);
+        when(userValidationServicePort.existsRelationWithUserAndIdRestaurant(order.getRestaurant().getId())).thenReturn(true);
+
+        //act
+        assertThrows(UserHasNoPermissionException.class ,() -> orderUseCase.changeStatusToReady(idOrder, token));
+
+        verify(tokenValidationPort).findIdUserFromToken(token);
+        verify(orderPersistencePort).findById(idOrder);
+        verify(userValidationServicePort).existsRelationWithUserAndIdRestaurant(order.getRestaurant().getId());
+        verify(userValidationServicePort, times(0)).findClientAndEmployeeInfo(idClient, idEmployee);
+        verify(orderPersistencePort, times(0)).saveOrderAndTraceability(any(Order.class), any(OrderLogDto.class));
+        verify(messagingCommunicationPort, times(0)).sendSms(anyString(), anyString());
     }
 
 }

@@ -9,8 +9,8 @@ public class Order {
     private Integer status;
     private Long idChef;
     private Restaurant restaurant;
-
     private LocalDateTime dateFinished;
+    private String deliveryPin;
     public Long getId() {
         return id;
     }
@@ -65,6 +65,14 @@ public class Order {
 
     public void setDateFinished(LocalDateTime dateFinished) {
         this.dateFinished = dateFinished;
+    }
+
+    public String getDeliveryPin() {
+        return deliveryPin;
+    }
+
+    public void setDeliveryPin(String deliveryPin) {
+        this.deliveryPin = deliveryPin;
     }
 
     public Order() {

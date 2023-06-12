@@ -162,4 +162,10 @@ public class ControllerAdvisor {
                 .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY, "Bad request exception from traceability microservice"));
     }
 
+    @ExceptionHandler(GivenPinIsNotCorrectException.class)
+    public ResponseEntity<Map<String, String>> handleGivenPinIsNotCorrectException(GivenPinIsNotCorrectException givenPinIsNotCorrectException) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY, "The given pin is not correct"));
+    }
+
 }

@@ -5,10 +5,7 @@ import com.pragma.powerup.foodcourtmicroservice.domain.api.IOrderDishServicePort
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IRestaurantServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IUserValidationServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.*;
-import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.ClientAlreadyHasAnActiveOrderException;
-import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.FailValidatingRequiredVariableException;
-import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.NoDataFoundException;
-import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.UserHasNoPermissionException;
+import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.*;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Order;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Restaurant;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.IMessagingCommunicationPort;
@@ -405,4 +402,105 @@ class OrderUseCaseTest {
         verify(messagingCommunicationPort, times(0)).sendSms(anyString(), anyString());
     }
 
+
+    @Test
+    void changeStatusToReadyDelivered_successfully(){
+        Long idOrder = 1L;
+        String token = "valid_token";
+        String pin = "aadd";
+        Long idEmployee = 1L;
+        Long idClient = 2L;
+        OrderActorsDto orderActorsDto = new OrderActorsDto();
+        orderActorsDto.setClient(new UserBasicInfoDto(idClient,"a","b","c"));
+        orderActorsDto.setEmployee(new UserBasicInfoDto(idEmployee,"a","b","c"));
+
+        Order order = new Order();
+        order.setId(idOrder);
+        order.setStatus(READY_ORDER_STATUS_INT_VALUE);
+        order.setRestaurant(new Restaurant(1L));
+        order.setIdClient(idClient);
+        order.setIdChef(1L);
+        order.setDeliveryPin(pin);
+
+        when(tokenValidationPort.findIdUserFromToken(token)).thenReturn(idEmployee);
+        when(orderPersistencePort.findById(idOrder)).thenReturn(order);
+        when(userValidationServicePort.existsRelationWithUserAndIdRestaurant(order.getRestaurant().getId())).thenReturn(true);
+        when(userValidationServicePort.findClientAndEmployeeInfo(idClient,idEmployee)).thenReturn(orderActorsDto);
+        Order orderSaved = new Order();
+        orderSaved.setStatus(DELIVERED_ORDER_STATUS_INT_VALUE);
+        when(orderPersistencePort.saveOrderAndTraceability(any(Order.class), any(OrderLogDto.class))).thenReturn(orderSaved);
+
+        //act
+        Order result = orderUseCase.changeStatusToDelivered(idOrder, pin, token);
+
+        assertEquals(DELIVERED_ORDER_STATUS_INT_VALUE,result.getStatus());
+        verify(tokenValidationPort).findIdUserFromToken(token);
+        verify(orderPersistencePort).findById(idOrder);
+        verify(userValidationServicePort).existsRelationWithUserAndIdRestaurant(order.getRestaurant().getId());
+        verify(userValidationServicePort).findClientAndEmployeeInfo(idClient, idEmployee);
+        verify(orderPersistencePort).saveOrderAndTraceability(any(Order.class), any(OrderLogDto.class));
+    }
+
+    @Test
+    void changeStatusToReadyDelivered_userHasNoPermissionException(){
+        Long idOrder = 1L;
+        String token = "valid_token";
+        String pin = "aadd";
+        Long idEmployee = 1L;
+        Long idClient = 2L;
+        OrderActorsDto orderActorsDto = new OrderActorsDto();
+        orderActorsDto.setClient(new UserBasicInfoDto(idClient,"a","b","c"));
+        orderActorsDto.setEmployee(new UserBasicInfoDto(idEmployee,"a","b","c"));
+
+        Order order = new Order();
+        order.setId(idOrder);
+        order.setStatus(READY_ORDER_STATUS_INT_VALUE);
+        order.setRestaurant(new Restaurant(1L));
+        order.setIdClient(idClient);
+        order.setIdChef(30L);
+        order.setDeliveryPin(pin);
+
+        when(tokenValidationPort.findIdUserFromToken(token)).thenReturn(idEmployee);
+        when(orderPersistencePort.findById(idOrder)).thenReturn(order);
+        when(userValidationServicePort.existsRelationWithUserAndIdRestaurant(order.getRestaurant().getId())).thenReturn(true);
+
+        //act
+        assertThrows(UserHasNoPermissionException.class, () -> orderUseCase.changeStatusToDelivered(idOrder, pin, token));
+
+        verify(tokenValidationPort).findIdUserFromToken(token);
+        verify(orderPersistencePort).findById(idOrder);
+        verify(userValidationServicePort).existsRelationWithUserAndIdRestaurant(order.getRestaurant().getId());
+    }
+
+    @Test
+    void changeStatusToReadyDelivered_givenPinIsNotCorrectException(){
+        Long idOrder = 1L;
+        String token = "valid_token";
+        String pin = "aadd";
+        Long idEmployee = 1L;
+        Long idClient = 2L;
+        OrderActorsDto orderActorsDto = new OrderActorsDto();
+        orderActorsDto.setClient(new UserBasicInfoDto(idClient,"a","b","c"));
+        orderActorsDto.setEmployee(new UserBasicInfoDto(idEmployee,"a","b","c"));
+
+        Order order = new Order();
+        order.setId(idOrder);
+        order.setStatus(READY_ORDER_STATUS_INT_VALUE);
+        order.setRestaurant(new Restaurant(1L));
+        order.setIdClient(idClient);
+        order.setIdChef(1L);
+        order.setDeliveryPin("DIFFERENT_PIN");
+
+        when(tokenValidationPort.findIdUserFromToken(token)).thenReturn(idEmployee);
+        when(orderPersistencePort.findById(idOrder)).thenReturn(order);
+        when(userValidationServicePort.existsRelationWithUserAndIdRestaurant(order.getRestaurant().getId())).thenReturn(true);
+
+
+        //act
+        assertThrows(GivenPinIsNotCorrectException.class, () -> orderUseCase.changeStatusToDelivered(idOrder, pin, token));
+
+        verify(tokenValidationPort).findIdUserFromToken(token);
+        verify(orderPersistencePort).findById(idOrder);
+        verify(userValidationServicePort).existsRelationWithUserAndIdRestaurant(order.getRestaurant().getId());
+    }
 }

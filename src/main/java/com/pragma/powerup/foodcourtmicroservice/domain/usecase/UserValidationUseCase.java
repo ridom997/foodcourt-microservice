@@ -32,7 +32,7 @@ public class UserValidationUseCase implements IUserValidationServicePort {
     }
 
     @Override
-    public Boolean existsRelationWithUserAndIdRestaurant(Long idRestaurant) {
+    public Boolean existsRelationWithUserAndIdRestaurant(Long idRestaurant) { //call user microservice and send the incoming jwtToken in the header.
         return userValidationComunicationPort.existsRelationWithUserAndIdRestaurant(idRestaurant);
     }
 }

@@ -1,25 +1,24 @@
 package com.pragma.powerup.foodcourtmicroservice.domain.usecase;
 
+import com.pragma.powerup.foodcourtmicroservice.domain.adapter.ExternalCommunicationDomainAdapter;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IUserValidationServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.OrderActorsDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.UserBasicInfoDto;
-import com.pragma.powerup.foodcourtmicroservice.domain.spi.IUserValidationComunicationPort;
 
 import java.util.List;
 
 public class UserValidationUseCase implements IUserValidationServicePort {
 
-    private final IUserValidationComunicationPort userValidationComunicationPort;
+    private final ExternalCommunicationDomainAdapter externalCommunicationDomainAdapter;
 
-
-    public UserValidationUseCase(IUserValidationComunicationPort userValidationComunicationPort) {
-        this.userValidationComunicationPort = userValidationComunicationPort;
+    public UserValidationUseCase(ExternalCommunicationDomainAdapter externalCommunicationDomainAdapter) {
+        this.externalCommunicationDomainAdapter = externalCommunicationDomainAdapter;
     }
 
 
     @Override
     public OrderActorsDto findClientAndEmployeeInfo(Long idClient, Long idEmployee) {
-        List<UserBasicInfoDto> userBasicInfoDtoList = userValidationComunicationPort.getBasicInfoOfUsers(List.of(idClient, idEmployee));
+        List<UserBasicInfoDto> userBasicInfoDtoList = externalCommunicationDomainAdapter.getBasicInfoOfUsers(List.of(idClient, idEmployee));
         OrderActorsDto orderActorsDto = new OrderActorsDto();
         // mapping client info and employee info.
         userBasicInfoDtoList.stream().forEach(user -> {
@@ -33,12 +32,12 @@ public class UserValidationUseCase implements IUserValidationServicePort {
 
     @Override
     public UserBasicInfoDto findClientInfo(Long idClient) {
-        List<UserBasicInfoDto> userBasicInfoDtoList = userValidationComunicationPort.getBasicInfoOfUsers(List.of(idClient));
+        List<UserBasicInfoDto> userBasicInfoDtoList = externalCommunicationDomainAdapter.getBasicInfoOfUsers(List.of(idClient));
         return userBasicInfoDtoList.get(0);
     }
 
     @Override
     public Boolean existsRelationWithUserAndIdRestaurant(Long idRestaurant) { //call user microservice and send the incoming jwtToken in the header.
-        return userValidationComunicationPort.existsRelationWithUserAndIdRestaurant(idRestaurant);
+        return externalCommunicationDomainAdapter.existsRelationWithUserAndIdRestaurant(idRestaurant);
     }
 }

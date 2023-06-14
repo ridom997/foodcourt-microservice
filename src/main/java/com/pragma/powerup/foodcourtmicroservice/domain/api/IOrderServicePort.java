@@ -3,6 +3,7 @@ package com.pragma.powerup.foodcourtmicroservice.domain.api;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.NewOrderDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.OrderAndStatusMessagingDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.OrderWithDetailDto;
+import com.pragma.powerup.foodcourtmicroservice.domain.dto.response.HistoryOrderDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Order;
 
 import java.util.List;
@@ -23,4 +24,6 @@ public interface IOrderServicePort {
     Order changeStatusToDelivered(Long idOrder, String pin, String token);
 
     Order changeStatusToCancelled(Long idOrder, String token);
+
+    HistoryOrderDto getHistoryOfOrder(Long idOrder, String token);
 }

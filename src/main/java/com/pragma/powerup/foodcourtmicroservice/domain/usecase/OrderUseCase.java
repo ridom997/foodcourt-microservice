@@ -1,7 +1,10 @@
 package com.pragma.powerup.foodcourtmicroservice.domain.usecase;
 
+import com.pragma.powerup.foodcourtmicroservice.domain.adapter.ExternalCommunicationDomainAdapter;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.*;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.*;
+import com.pragma.powerup.foodcourtmicroservice.domain.dto.response.HistoryOrderDto;
+import com.pragma.powerup.foodcourtmicroservice.domain.dto.response.TraceabilityOrderDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.ClientAlreadyHasAnActiveOrderException;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.GivenPinIsNotCorrectException;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.NoDataFoundException;
@@ -9,7 +12,6 @@ import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.UserHasNoPermi
 import com.pragma.powerup.foodcourtmicroservice.domain.mappers.OrderMapper;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Order;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Restaurant;
-import com.pragma.powerup.foodcourtmicroservice.domain.spi.IMessagingCommunicationPort;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.IOrderPersistencePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.ITokenValidationPort;
 import com.pragma.powerup.foodcourtmicroservice.domain.utils.OrderUtils;
@@ -20,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.pragma.powerup.foodcourtmicroservice.configuration.Constants.*;
+import static com.pragma.powerup.foodcourtmicroservice.domain.constants.MessageConstants.ORDER_DOES_NOT_BELONG_TO_CLIENT;
 import static com.pragma.powerup.foodcourtmicroservice.domain.constants.MessageConstants.USER_IS_NOT_AN_EMPLOYEE_OF_THE_RESTAURANT;
 
 public class OrderUseCase implements IOrderServicePort {
@@ -30,17 +33,16 @@ public class OrderUseCase implements IOrderServicePort {
     private final IRestaurantServicePort restaurantServicePort;
 
     private final IOrderDishServicePort orderDishServicePort;
-    private final IMessagingCommunicationPort messagingCommunicationPort;
-    
+    private final ExternalCommunicationDomainAdapter externalCommunicationDomainAdapter;
     private final IUserValidationServicePort userValidationServicePort;
 
-    public OrderUseCase(IOrderPersistencePort orderPersistencePort, ITokenValidationPort tokenValidationPort, IDishServicePort dishServicePort, IRestaurantServicePort restaurantServicePort, IOrderDishServicePort orderDishServicePort, IMessagingCommunicationPort messagingCommunicationPort, IUserValidationServicePort userValidationServicePort) {
+    public OrderUseCase(IOrderPersistencePort orderPersistencePort, ITokenValidationPort tokenValidationPort, IDishServicePort dishServicePort, IRestaurantServicePort restaurantServicePort, IOrderDishServicePort orderDishServicePort, ExternalCommunicationDomainAdapter externalCommunicationDomainAdapter, IUserValidationServicePort userValidationServicePort) {
         this.orderPersistencePort = orderPersistencePort;
         this.tokenValidationPort = tokenValidationPort;
         this.dishServicePort = dishServicePort;
         this.restaurantServicePort = restaurantServicePort;
         this.orderDishServicePort = orderDishServicePort;
-        this.messagingCommunicationPort = messagingCommunicationPort;
+        this.externalCommunicationDomainAdapter = externalCommunicationDomainAdapter;
         this.userValidationServicePort = userValidationServicePort;
     }
 
@@ -114,7 +116,7 @@ public class OrderUseCase implements IOrderServicePort {
         order.setDeliveryPin(deliveryPin);
         return new OrderAndStatusMessagingDto(
                 orderPersistencePort.saveOrderAndTraceability(order, OrderMapper.mapToOrderLogDto(order,IN_PROGRESS_ORDER_STATUS_INT_VALUE,clientAndEmployeeInfo)),
-                messagingCommunicationPort.sendSms(clientAndEmployeeInfo.getClient().getPhone(), ORDER_READY_SMS_BODY_BASE_MESSAGE+deliveryPin)
+                externalCommunicationDomainAdapter.sendSms(clientAndEmployeeInfo.getClient().getPhone(), ORDER_READY_SMS_BODY_BASE_MESSAGE+deliveryPin)
         );
     }
 
@@ -153,7 +155,7 @@ public class OrderUseCase implements IOrderServicePort {
         Long idClient = validateRoleAndReturnIdUserFromToken(token,CLIENT_ROLE_NAME);
         Order order = findById(idOrder);
         if(!order.getIdClient().equals(idClient))
-            throw new UserHasNoPermissionException("the order does not belong to the client");
+            throw new UserHasNoPermissionException(ORDER_DOES_NOT_BELONG_TO_CLIENT);
         if(!order.getStatus().equals(PENDING_ORDER_STATUS_INT_VALUE))
             throw new UserHasNoPermissionException("Sorry, your order is already in preparation and cannot be cancelled.");
         order.setStatus(CANCELLED_ORDER_STATUS_INT_VALUE);
@@ -163,5 +165,23 @@ public class OrderUseCase implements IOrderServicePort {
         clientAndEmployeeInfo.setClient(userValidationServicePort.findClientInfo(idClient));
         clientAndEmployeeInfo.setEmployee(new UserBasicInfoDto(0L,"DEFAULT","NAME","DEFAULT@pragma.com"));
         return orderPersistencePort.saveOrderAndTraceability(order,OrderMapper.mapToOrderLogDto(order,PENDING_ORDER_STATUS_INT_VALUE,clientAndEmployeeInfo));
+    }
+
+    @Override
+    public HistoryOrderDto getHistoryOfOrder(Long idOrder, String token) {
+        Long idClient = validateRoleAndReturnIdUserFromToken(token,CLIENT_ROLE_NAME);
+        Order order = findById(idOrder);
+        if(!order.getIdClient().equals(idClient))
+            throw new UserHasNoPermissionException(ORDER_DOES_NOT_BELONG_TO_CLIENT);
+        List<TraceabilityOrderDto> traceabilityListOfOrder = null;
+        if(!order.getStatus().equals(PENDING_ORDER_STATUS_INT_VALUE)) //initial status so there are no log changes
+            traceabilityListOfOrder = externalCommunicationDomainAdapter.getTraceabilityListOfOrder(idOrder);
+        return new HistoryOrderDto(
+                order.getId(),
+                traceabilityListOfOrder,
+                order.getDate(),
+                order.getDateFinished(),
+                order.getIdChef(),
+                order.getStatus());
     }
 }

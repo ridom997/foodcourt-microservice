@@ -1,12 +1,12 @@
 package com.pragma.powerup.foodcourtmicroservice.domain.usecase;
 
 import com.pragma.powerup.foodcourtmicroservice.configuration.Constants;
+import com.pragma.powerup.foodcourtmicroservice.domain.adapter.ExternalCommunicationDomainAdapter;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IRestaurantServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.*;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Restaurant;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.IRestaurantPersistencePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.ITokenValidationPort;
-import com.pragma.powerup.foodcourtmicroservice.domain.spi.IUserValidationComunicationPort;
 import com.pragma.powerup.foodcourtmicroservice.domain.validations.PaginationValidations;
 import com.pragma.powerup.foodcourtmicroservice.domain.validations.ArgumentValidations;
 
@@ -16,12 +16,12 @@ import static com.pragma.powerup.foodcourtmicroservice.configuration.Constants.*
 
 public class RestaurantUseCase implements IRestaurantServicePort {
     private final IRestaurantPersistencePort restaurantPersistancePort;
-    private final IUserValidationComunicationPort userValidationComunicationPort;
+    private final ExternalCommunicationDomainAdapter externalCommunicationDomainAdapter;
     private final ITokenValidationPort tokenValidationPort;
 
-    public RestaurantUseCase(IRestaurantPersistencePort restaurantPersistancePort, IUserValidationComunicationPort userValidationComunicationPort, ITokenValidationPort tokenValidationPort) {
+    public RestaurantUseCase(IRestaurantPersistencePort restaurantPersistancePort, ExternalCommunicationDomainAdapter externalCommunicationDomainAdapter, ITokenValidationPort tokenValidationPort) {
         this.restaurantPersistancePort = restaurantPersistancePort;
-        this.userValidationComunicationPort = userValidationComunicationPort;
+        this.externalCommunicationDomainAdapter = externalCommunicationDomainAdapter;
         this.tokenValidationPort = tokenValidationPort;
     }
 
@@ -33,9 +33,9 @@ public class RestaurantUseCase implements IRestaurantServicePort {
                 throw new InvalidPhoneException();
             if (!restaurant.getNit().matches(Constants.ONLY_NUMBERS_REGEX))
                 throw new NotOnlyNumbersException();
-            Boolean userHasRole = userValidationComunicationPort.userHasRole(restaurant.getIdOwner(), Constants.OWNER_ROLE_ID);
+            Boolean userHasRole = externalCommunicationDomainAdapter.userHasRole(restaurant.getIdOwner(), Constants.OWNER_ROLE_ID);
             if(userHasRole.equals(false))
-                throw new UserHasNoPermissionException("The user provided in the request is no an owner");
+                throw new UserHasNoPermissionException("The user provided in the request is not an owner");
             restaurantPersistancePort.saveRestaurant(restaurant);
     }
 

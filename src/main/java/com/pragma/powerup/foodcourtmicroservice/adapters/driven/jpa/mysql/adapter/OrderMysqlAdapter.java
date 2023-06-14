@@ -3,10 +3,10 @@ package com.pragma.powerup.foodcourtmicroservice.adapters.driven.jpa.mysql.adapt
 import com.pragma.powerup.foodcourtmicroservice.adapters.driven.jpa.mysql.entity.OrderEntity;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driven.jpa.mysql.mappers.IOrderEntityMapper;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driven.jpa.mysql.repositories.IOrderEntityRepository;
+import com.pragma.powerup.foodcourtmicroservice.domain.adapter.ExternalCommunicationDomainAdapter;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.OrderLogDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Order;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.IOrderPersistencePort;
-import com.pragma.powerup.foodcourtmicroservice.domain.spi.ITraceabilityCommunicationPort;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,7 +21,7 @@ public class OrderMysqlAdapter implements IOrderPersistencePort {
 
     private final IOrderEntityRepository orderEntityRepository;
     private final IOrderEntityMapper orderEntityMapper;
-    private final ITraceabilityCommunicationPort communicationPort;
+    private final ExternalCommunicationDomainAdapter externalCommunicationDomainAdapter;
 
     @Override
     public Order saveOrder(Order order) {
@@ -32,7 +32,7 @@ public class OrderMysqlAdapter implements IOrderPersistencePort {
     @Transactional
     public Order saveOrderAndTraceability(Order order, OrderLogDto orderLogDto) {
         Order savedOrder = saveOrder(order);
-        communicationPort.saveOrderLog(orderLogDto);
+        externalCommunicationDomainAdapter.saveOrderLog(orderLogDto);
         return savedOrder;
     }
 

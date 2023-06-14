@@ -1,11 +1,10 @@
 package com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.mapper.response;
 
-import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.OrderAndStatusMessagingResponseDto;
-import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.OrderDishResponseDto;
-import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.OrderResponseDto;
-import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.OrderWithDetailResponseDto;
+import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.*;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.OrderAndStatusMessagingDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.OrderWithDetailDto;
+import com.pragma.powerup.foodcourtmicroservice.domain.dto.response.HistoryOrderDto;
+import com.pragma.powerup.foodcourtmicroservice.domain.dto.response.TraceabilityOrderDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Order;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.OrderDish;
 import com.pragma.powerup.foodcourtmicroservice.domain.utils.OrderUtils;
@@ -48,4 +47,12 @@ public interface IOrderResponseMapper {
     OrderWithDetailResponseDto toOrderWithDetailResponseDto(OrderWithDetailDto orderWithDetailDto);
 
     OrderAndStatusMessagingResponseDto toOrderAndStatusMessagingResponseDto(OrderAndStatusMessagingDto orderAndStatusMessagingDto);
+
+    @Mapping(source = "traceabilityOrderDto.previousStatus", target = "previousStatus", qualifiedByName = "mapStatusIntToString")
+    @Mapping(source = "traceabilityOrderDto.newStatus", target = "newStatus", qualifiedByName = "mapStatusIntToString")
+    TraceabilityOrderResponseDto mapToTraceabilityOrderResponseDto(TraceabilityOrderDto traceabilityOrderDto);
+
+
+    @Mapping(source = "historyOrderDto.actualStatus", target = "actualStatus", qualifiedByName = "mapStatusIntToString")
+    HistoryOrderResponseDto mapToHistoryOrderResponseDto(HistoryOrderDto historyOrderDto);
 }

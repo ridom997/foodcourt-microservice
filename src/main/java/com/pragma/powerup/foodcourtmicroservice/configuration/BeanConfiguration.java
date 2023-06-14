@@ -8,6 +8,7 @@ import com.pragma.powerup.foodcourtmicroservice.adapters.driven.jpa.mysql.mapper
 import com.pragma.powerup.foodcourtmicroservice.adapters.driven.jpa.mysql.repositories.*;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.adapter.TokenValidationSpringAdapter;
 import com.pragma.powerup.foodcourtmicroservice.configuration.security.jwt.JwtProvider;
+import com.pragma.powerup.foodcourtmicroservice.domain.adapter.ExternalCommunicationDomainAdapter;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.*;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.*;
 import com.pragma.powerup.foodcourtmicroservice.domain.usecase.*;
@@ -48,7 +49,7 @@ public class BeanConfiguration {
 
     @Bean
     public IRestaurantServicePort restaurantServicePort(){
-        return new RestaurantUseCase(restaurantPersistancePort(), userValidationServicePort, tokenValidationPort());
+        return new RestaurantUseCase(restaurantPersistancePort(), externalCommunicationDomainAdapter(), tokenValidationPort());
     }
 
     @Bean
@@ -81,7 +82,7 @@ public class BeanConfiguration {
     }
     @Bean
     public IOrderPersistencePort orderPersistencePort(){
-        return new OrderMysqlAdapter(orderEntityRepository,orderEntityMapper, traceabilityCommunicationPort);
+        return new OrderMysqlAdapter(orderEntityRepository,orderEntityMapper, externalCommunicationDomainAdapter());
     }
 
     @Bean
@@ -91,7 +92,12 @@ public class BeanConfiguration {
 
     @Bean
     public IUserValidationServicePort userValidationServicePort(){
-        return new UserValidationUseCase(userValidationServicePort);
+        return new UserValidationUseCase(externalCommunicationDomainAdapter());
+    }
+
+    @Bean
+    public ExternalCommunicationDomainAdapter externalCommunicationDomainAdapter(){
+        return new ExternalCommunicationDomainAdapter(messagingCommunicationPort,traceabilityCommunicationPort,userValidationServicePort);
     }
     @Bean
     public IOrderServicePort orderServicePort() {
@@ -100,7 +106,7 @@ public class BeanConfiguration {
                 dishServicePort(),
                 restaurantServicePort(),
                 orderDishServicePort(),
-                messagingCommunicationPort,
+                externalCommunicationDomainAdapter(),
                 userValidationServicePort());
     }
 }

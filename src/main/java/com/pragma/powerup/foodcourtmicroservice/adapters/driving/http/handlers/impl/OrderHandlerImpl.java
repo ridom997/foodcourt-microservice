@@ -1,6 +1,7 @@
 package com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.handlers.impl;
 
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.request.NewOrderRequestDto;
+import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.HistoryOrderResponseDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.OrderAndStatusMessagingResponseDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.OrderResponseDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.OrderWithDetailResponseDto;
@@ -67,6 +68,13 @@ public class OrderHandlerImpl implements IOrderHandler {
         return orderResponseMapper.toOrderResponseDto(
                 orderServicePort.changeStatusToCancelled(idOrder,
                         JwtUtils.getTokenFromRequestHeaders())
+        );
+    }
+
+    @Override
+    public HistoryOrderResponseDto getHistoryOfOrder(Long idOrder) {
+        return orderResponseMapper.mapToHistoryOrderResponseDto(
+                orderServicePort.getHistoryOfOrder(idOrder,JwtUtils.getTokenFromRequestHeaders())
         );
     }
 }

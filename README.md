@@ -56,7 +56,8 @@ To get a local copy up and running follow these steps.
 
 <!-- GUIDE -->
 ## GUIDE (SPANISH)
-En caso de usar un endpoint sin la autorización necesaria saldrá de respuesta "Wrong credentials or role not allowed".
+- En caso de usar un endpoint sin la autorización necesaria saldrá de respuesta "Wrong credentials or role not allowed".
+- Cuando un cliente crea un pedido (order), se le asocia a este un idChef = 0, el cual significa que aun no ha sido asignado  a ningun empleado.
 ### HU2:
 + Es necesario ejecutar del data.sql la seccion "-- hu-2"
   + El usuario insertado corresponde a un propietario con correo: corr@e.o, contraseña= 1234. (dicho usuario tiene id = 100).
@@ -126,6 +127,10 @@ En caso de usar un endpoint sin la autorización necesaria saldrá de respuesta 
 + Se hizo el endpoint "/orders/{idOrder}/cancel" el cual es necesario estar autenticado como el cliente que hizo el pedido (order).
 + Para que este endpoint funcione correctamente es necesario tener activo los microservicios (user y traceability).
 + Solo se pueden cambiar a estado "CANCELLED" las ordenes que es esten en estado "PENDING"
+### HU17:
++ Se hizo el endpoint "/orders/{idOrder}/history" el cual es necesario estar autenticado como cliente que hizo el pedido (order)
++ Para que este endpoint funcione correctamente es necesario tener activo el microservicio traceability.
++ En caso de que el pedido (order) esté en estado 1 (PENDING) no se trae lista de cambios de estado, debido a que este es el estado inicial.
 <!-- ROADMAP -->
 ## Tests
 

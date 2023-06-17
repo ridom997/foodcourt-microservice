@@ -5,6 +5,7 @@ import com.pragma.powerup.foodcourtmicroservice.adapters.driven.jpa.mysql.mapper
 import com.pragma.powerup.foodcourtmicroservice.adapters.driven.jpa.mysql.repositories.IOrderEntityRepository;
 import com.pragma.powerup.foodcourtmicroservice.domain.adapter.ExternalCommunicationDomainAdapter;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.OrderLogDto;
+import com.pragma.powerup.foodcourtmicroservice.domain.dto.response.OrderDurationInfoDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Order;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.IOrderPersistencePort;
 import lombok.AllArgsConstructor;
@@ -57,6 +58,15 @@ public class OrderMysqlAdapter implements IOrderPersistencePort {
         Page<OrderEntity> ordersByIdRestaurantAndStatus = orderEntityRepository.getOrdersByIdRestaurantAndStatus(idRestaurant, status, pageable);
         return ordersByIdRestaurantAndStatus.stream()
                 .map(orderEntityMapper::mapToOrder)
+                .toList();
+    }
+
+    @Override
+    public List<OrderDurationInfoDto> findAllPagedCompletedOrdersByIdRestaurant(Long idRestaurant, Integer page, Integer sizePage) {
+        Pageable pageable = PageRequest.of(page, sizePage);
+        Page<OrderEntity> completedOrdersByIdRestaurant = orderEntityRepository.getCompletedOrdersByIdRestaurant(idRestaurant, pageable);
+        return completedOrdersByIdRestaurant.stream()
+                .map(order -> new OrderDurationInfoDto(order.getId(),order.getDate(),order.getDateFinished(),order.getStatus()))
                 .toList();
     }
 }

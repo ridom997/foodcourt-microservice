@@ -2,6 +2,7 @@ package com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.controlle
 
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.request.RestaurantRequestDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.DishResponseDto;
+import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.OrderDurationInfoResponseDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.OrderWithDetailResponseDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.RestaurantResponseDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.handlers.IDishHandler;
@@ -144,6 +145,31 @@ public class RestaurantController {
         RequestParamValidator.validate(httpServletRequest); //validate request params
         return ResponseEntity.status(HttpStatus.OK)
                 .body(orderHandler.findAllPagedOrdersByIdStatus(idRestaurant,idStatus,page,size));
+    }
+
+    @Operation(summary = "List of completed orders of restaurant with duration",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "List of completed orders (returns a list of objects similar to the example object)",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = OrderDurationInfoResponseDto.class))),
+                    @ApiResponse(responseCode = "403", description = "User who made the request is not the restaurant owner",
+                            content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
+                    @ApiResponse(responseCode = "400", description = "Bad Request (check response message)",
+                            content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized request",
+                            content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
+                    @ApiResponse(responseCode = "404", description = "No orders found or No restaurant found",
+                            content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error")))
+            })
+    @GetMapping(value = "/{idRestaurant}/completed-orders-duration")
+    public ResponseEntity<List<OrderDurationInfoResponseDto>> findAllCompletedOrdersDurationByRestaurant(
+            HttpServletRequest httpServletRequest,
+            @PathVariable Long idRestaurant,
+            @RequestParam int page,
+            @RequestParam int size
+    ) {
+        RequestParamValidator.validate(httpServletRequest);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(restaurantHandler.getDurationOfOrdersByRestaurant(idRestaurant,page,size));
     }
 
 }

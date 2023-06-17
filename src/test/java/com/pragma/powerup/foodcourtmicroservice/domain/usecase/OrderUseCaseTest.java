@@ -1,12 +1,10 @@
 package com.pragma.powerup.foodcourtmicroservice.domain.usecase;
 
 import com.pragma.powerup.foodcourtmicroservice.domain.adapter.ExternalCommunicationDomainAdapter;
-import com.pragma.powerup.foodcourtmicroservice.domain.api.IDishServicePort;
-import com.pragma.powerup.foodcourtmicroservice.domain.api.IOrderDishServicePort;
-import com.pragma.powerup.foodcourtmicroservice.domain.api.IRestaurantServicePort;
-import com.pragma.powerup.foodcourtmicroservice.domain.api.IUserValidationServicePort;
+import com.pragma.powerup.foodcourtmicroservice.domain.api.*;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.*;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.response.HistoryOrderDto;
+import com.pragma.powerup.foodcourtmicroservice.domain.dto.response.OrderDurationInfoDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.*;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Order;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Restaurant;
@@ -23,9 +21,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 import static com.pragma.powerup.foodcourtmicroservice.configuration.Constants.*;
+import static com.pragma.powerup.foodcourtmicroservice.domain.constants.MessageConstants.NO_ORDERS_FOUND_MESSAGE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
@@ -40,7 +40,7 @@ class OrderUseCaseTest {
     @Mock
     private IDishServicePort dishServicePort;
     @Mock
-    private IRestaurantServicePort restaurantServicePort;
+    private IRestaurantOrderCommonServicePort restaurantServicePort;
     @Mock
     private IOrderDishServicePort orderDishServicePort;
 
@@ -73,7 +73,7 @@ class OrderUseCaseTest {
         orderSaved.setId(1L);
         List<DishAndAmountDto> dishAndAmountDtoList = List.of(new DishAndAmountDto(), new DishAndAmountDto());
         when(tokenValidationPort.findIdUserFromToken(token)).thenReturn(idClient);
-        when(restaurantServicePort.findById(newOrderDto.getIdRestaurant())).thenReturn(new Restaurant(1L));
+        when(restaurantServicePort.findRestaurantById(newOrderDto.getIdRestaurant())).thenReturn(new Restaurant(1L));
         when(orderPersistencePort.existOrderOfClientWithDifferentStatus(idClient, DELIVERED_ORDER_STATUS_INT_VALUE, 1L)).thenReturn(false);
         when(dishServicePort.generateValidatedDishList(1L, newOrderDto.getDishes())).thenReturn(dishAndAmountDtoList);
         when(orderPersistencePort.saveOrder(any(Order.class))).thenReturn(orderSaved);
@@ -82,7 +82,7 @@ class OrderUseCaseTest {
 
         verify(tokenValidationPort, times(1)).findIdUserFromToken(token);
         verify(tokenValidationPort, times(1)).verifyRoleInToken(token, "ROLE_CLIENT");
-        verify(restaurantServicePort, times(1)).findById(newOrderDto.getIdRestaurant());
+        verify(restaurantServicePort, times(1)).findRestaurantById(newOrderDto.getIdRestaurant());
         verify(orderPersistencePort, times(1)).existOrderOfClientWithDifferentStatus(idClient, DELIVERED_ORDER_STATUS_INT_VALUE, newOrderDto.getIdRestaurant());
         verify(orderDishServicePort).saveListOrderDish(orderSaved, dishAndAmountDtoList);
         assertEquals(orderSaved.getId(), result.getId());
@@ -93,7 +93,7 @@ class OrderUseCaseTest {
         String token = "valid_token";
         Long idClient = 10L;
         when(tokenValidationPort.findIdUserFromToken(token)).thenReturn(idClient);
-        when(restaurantServicePort.findById(newOrderDto.getIdRestaurant())).thenReturn(new Restaurant(1L));
+        when(restaurantServicePort.findRestaurantById(newOrderDto.getIdRestaurant())).thenReturn(new Restaurant(1L));
         when(orderPersistencePort.existOrderOfClientWithDifferentStatus(idClient, DELIVERED_ORDER_STATUS_INT_VALUE, 1L)).thenReturn(true);
 
         // Act and Assert
@@ -102,7 +102,7 @@ class OrderUseCaseTest {
         // Verify
         verify(tokenValidationPort, times(1)).findIdUserFromToken(token);
         verify(tokenValidationPort, times(1)).verifyRoleInToken(token, "ROLE_CLIENT");
-        verify(restaurantServicePort, times(1)).findById(newOrderDto.getIdRestaurant());
+        verify(restaurantServicePort, times(1)).findRestaurantById(newOrderDto.getIdRestaurant());
         verify(orderPersistencePort, times(1)).existOrderOfClientWithDifferentStatus(idClient, DELIVERED_ORDER_STATUS_INT_VALUE, newOrderDto.getIdRestaurant());
         verifyNoMoreInteractions(tokenValidationPort, restaurantServicePort, orderPersistencePort, dishServicePort, orderDishServicePort);
     }
@@ -660,6 +660,27 @@ class OrderUseCaseTest {
         assertEquals(historyOrderDtoExpected.getEndTime(), result.getEndTime());
         assertEquals(historyOrderDtoExpected.getIdChef(), result.getIdChef());
         assertEquals(historyOrderDtoExpected.getActualStatus(), result.getActualStatus());
+    }
+
+    @Test
+    void getDurationOfFinalizedOrdersByRestaurantTest_successfully() {
+        Restaurant restaurant = new Restaurant(1L);
+        Integer size = 0, page = 1;
+        List<OrderDurationInfoDto> expectedList = List.of(new OrderDurationInfoDto());
+        when(orderPersistencePort.findAllPagedCompletedOrdersByIdRestaurant(restaurant.getId(),page,size)).thenReturn(expectedList);
+
+        List<OrderDurationInfoDto> result = orderUseCase.getDurationOfFinalizedOrdersByRestaurant(restaurant, page, size);
+
+        assertEquals(expectedList,result);
+    }
+
+    @Test
+    void getDurationOfFinalizedOrdersByRestaurantTest_noItemsFound() {
+        Restaurant restaurant = new Restaurant(1L);
+        Integer size = 0, page = 1;
+        when(orderPersistencePort.findAllPagedCompletedOrdersByIdRestaurant(restaurant.getId(),page,size)).thenReturn(Collections.emptyList());
+
+        assertThrows(NoDataFoundException.class,() -> orderUseCase.getDurationOfFinalizedOrdersByRestaurant(restaurant, page, size));
     }
 
 }

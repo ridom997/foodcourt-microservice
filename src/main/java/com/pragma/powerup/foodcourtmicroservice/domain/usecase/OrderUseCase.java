@@ -4,6 +4,7 @@ import com.pragma.powerup.foodcourtmicroservice.domain.adapter.ExternalCommunica
 import com.pragma.powerup.foodcourtmicroservice.domain.api.*;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.*;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.response.HistoryOrderDto;
+import com.pragma.powerup.foodcourtmicroservice.domain.dto.response.OrderDurationInfoDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.response.TraceabilityOrderDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.ClientAlreadyHasAnActiveOrderException;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.GivenPinIsNotCorrectException;
@@ -22,21 +23,20 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.pragma.powerup.foodcourtmicroservice.configuration.Constants.*;
-import static com.pragma.powerup.foodcourtmicroservice.domain.constants.MessageConstants.ORDER_DOES_NOT_BELONG_TO_CLIENT;
-import static com.pragma.powerup.foodcourtmicroservice.domain.constants.MessageConstants.USER_IS_NOT_AN_EMPLOYEE_OF_THE_RESTAURANT;
+import static com.pragma.powerup.foodcourtmicroservice.domain.constants.MessageConstants.*;
 
 public class OrderUseCase implements IOrderServicePort {
 
     private final IOrderPersistencePort orderPersistencePort;
     private final ITokenValidationPort tokenValidationPort;
     private final IDishServicePort dishServicePort;
-    private final IRestaurantServicePort restaurantServicePort;
+    private final IRestaurantOrderCommonServicePort restaurantServicePort;
 
     private final IOrderDishServicePort orderDishServicePort;
     private final ExternalCommunicationDomainAdapter externalCommunicationDomainAdapter;
     private final IUserValidationServicePort userValidationServicePort;
 
-    public OrderUseCase(IOrderPersistencePort orderPersistencePort, ITokenValidationPort tokenValidationPort, IDishServicePort dishServicePort, IRestaurantServicePort restaurantServicePort, IOrderDishServicePort orderDishServicePort, ExternalCommunicationDomainAdapter externalCommunicationDomainAdapter, IUserValidationServicePort userValidationServicePort) {
+    public OrderUseCase(IOrderPersistencePort orderPersistencePort, ITokenValidationPort tokenValidationPort, IDishServicePort dishServicePort,IRestaurantOrderCommonServicePort restaurantServicePort, IOrderDishServicePort orderDishServicePort, ExternalCommunicationDomainAdapter externalCommunicationDomainAdapter, IUserValidationServicePort userValidationServicePort) {
         this.orderPersistencePort = orderPersistencePort;
         this.tokenValidationPort = tokenValidationPort;
         this.dishServicePort = dishServicePort;
@@ -49,7 +49,7 @@ public class OrderUseCase implements IOrderServicePort {
     @Override
     public Order saveOrder(NewOrderDto newOrderDto, String token) {
         Long idClient = validateRoleAndReturnIdUserFromToken(token,CLIENT_ROLE_NAME);
-        Restaurant restaurant = restaurantServicePort.findById(newOrderDto.getIdRestaurant());
+        Restaurant restaurant = restaurantServicePort.findRestaurantById(newOrderDto.getIdRestaurant());
         if (Boolean.TRUE.equals(orderPersistencePort.existOrderOfClientWithDifferentStatus(idClient, DELIVERED_ORDER_STATUS_INT_VALUE,restaurant.getId())))
             throw new ClientAlreadyHasAnActiveOrderException();
         List<DishAndAmountDto> dishes = dishServicePort.generateValidatedDishList(restaurant.getId(), newOrderDto.getDishes());
@@ -86,7 +86,7 @@ public class OrderUseCase implements IOrderServicePort {
             throw new UserHasNoPermissionException(USER_IS_NOT_AN_EMPLOYEE_OF_THE_RESTAURANT);
         List<Order> ordersByRestaurantAndStatus = orderPersistencePort.getOrdersByRestaurantAndStatus(page, sizePage, idRestaurant, status);
         if (ordersByRestaurantAndStatus.isEmpty())
-            throw new NoDataFoundException("No orders found");
+            throw new NoDataFoundException(NO_ORDERS_FOUND_MESSAGE);
         return ordersByRestaurantAndStatus.stream()
                 .map(order -> new OrderWithDetailDto(order, orderDishServicePort.getAllOrderDishByOrder(order)))
                 .toList();
@@ -184,4 +184,13 @@ public class OrderUseCase implements IOrderServicePort {
                 order.getIdChef(),
                 order.getStatus());
     }
+
+    @Override
+    public List<OrderDurationInfoDto> getDurationOfFinalizedOrdersByRestaurant(Restaurant restaurant, Integer page, Integer sizePage) {
+        List<OrderDurationInfoDto> allPagedCompletedOrdersByIdRestaurant = orderPersistencePort.findAllPagedCompletedOrdersByIdRestaurant(restaurant.getId(), page, sizePage);
+        if (allPagedCompletedOrdersByIdRestaurant.isEmpty())
+            throw new NoDataFoundException(NO_ORDERS_FOUND_MESSAGE);
+        return allPagedCompletedOrdersByIdRestaurant;
+    }
+
 }

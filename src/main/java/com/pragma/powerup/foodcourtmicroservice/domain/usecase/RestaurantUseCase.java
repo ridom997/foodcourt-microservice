@@ -2,13 +2,15 @@ package com.pragma.powerup.foodcourtmicroservice.domain.usecase;
 
 import com.pragma.powerup.foodcourtmicroservice.configuration.Constants;
 import com.pragma.powerup.foodcourtmicroservice.domain.adapter.ExternalCommunicationDomainAdapter;
+import com.pragma.powerup.foodcourtmicroservice.domain.api.IRestaurantOrderCommonServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IRestaurantServicePort;
+import com.pragma.powerup.foodcourtmicroservice.domain.dto.response.OrderDurationInfoDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.*;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Restaurant;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.IRestaurantPersistencePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.ITokenValidationPort;
-import com.pragma.powerup.foodcourtmicroservice.domain.validations.PaginationValidations;
 import com.pragma.powerup.foodcourtmicroservice.domain.validations.ArgumentValidations;
+import com.pragma.powerup.foodcourtmicroservice.domain.validations.PaginationValidations;
 
 import java.util.List;
 
@@ -19,10 +21,13 @@ public class RestaurantUseCase implements IRestaurantServicePort {
     private final ExternalCommunicationDomainAdapter externalCommunicationDomainAdapter;
     private final ITokenValidationPort tokenValidationPort;
 
-    public RestaurantUseCase(IRestaurantPersistencePort restaurantPersistancePort, ExternalCommunicationDomainAdapter externalCommunicationDomainAdapter, ITokenValidationPort tokenValidationPort) {
+    private final IRestaurantOrderCommonServicePort restaurantOrderCommonServicePort;
+
+    public RestaurantUseCase(IRestaurantPersistencePort restaurantPersistancePort, ExternalCommunicationDomainAdapter externalCommunicationDomainAdapter, ITokenValidationPort tokenValidationPort,IRestaurantOrderCommonServicePort restaurantOrderCommonServicePort) {
         this.restaurantPersistancePort = restaurantPersistancePort;
         this.externalCommunicationDomainAdapter = externalCommunicationDomainAdapter;
         this.tokenValidationPort = tokenValidationPort;
+        this.restaurantOrderCommonServicePort = restaurantOrderCommonServicePort;
     }
 
     @Override
@@ -41,11 +46,7 @@ public class RestaurantUseCase implements IRestaurantServicePort {
 
     @Override
     public Restaurant findById(Long id) {
-        ArgumentValidations.validateObject(id, ID_RESTAURANT_STRING_VALUE);
-        Restaurant restaurant = restaurantPersistancePort.findById(id);
-        if (restaurant == null)
-            throw new NoRestaurantFoundException();
-        return restaurant;
+        return restaurantOrderCommonServicePort.findRestaurantById(id);
     }
 
     @Override
@@ -79,6 +80,16 @@ public class RestaurantUseCase implements IRestaurantServicePort {
         if(listRestaurants.isEmpty())
             throw new NoDataFoundException("No restaurants found");
         return listRestaurants;
+    }
+
+    @Override
+    public List<OrderDurationInfoDto> getDurationOfOrdersByRestaurant(Long idRestaurant, Integer page, Integer sizePage, String token) {
+        PaginationValidations.validatePageAndSizePage(page,sizePage);
+        Restaurant restaurant = findById(idRestaurant);
+        if(Boolean.FALSE.equals(isTheRestaurantOwner(token, restaurant))){
+            throw new UserHasNoPermissionException(USER_IS_NOT_THE_RESTAURANT_OWNER_MESSAGE);
+        }
+        return restaurantOrderCommonServicePort.getDurationOfFinalizedOrdersByRestaurant(restaurant, page, sizePage);
     }
 
 

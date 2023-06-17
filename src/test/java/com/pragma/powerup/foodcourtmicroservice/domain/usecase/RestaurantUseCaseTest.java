@@ -2,11 +2,13 @@ package com.pragma.powerup.foodcourtmicroservice.domain.usecase;
 
 import com.pragma.powerup.foodcourtmicroservice.configuration.Constants;
 import com.pragma.powerup.foodcourtmicroservice.domain.adapter.ExternalCommunicationDomainAdapter;
+import com.pragma.powerup.foodcourtmicroservice.domain.api.IOrderServicePort;
+import com.pragma.powerup.foodcourtmicroservice.domain.api.IRestaurantOrderCommonServicePort;
+import com.pragma.powerup.foodcourtmicroservice.domain.dto.response.OrderDurationInfoDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.*;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Restaurant;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.IRestaurantPersistencePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.ITokenValidationPort;
-import com.pragma.powerup.foodcourtmicroservice.domain.spi.IUserValidationComunicationPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,6 +33,9 @@ class RestaurantUseCaseTest {
     @Mock
     private ITokenValidationPort tokenValidationPort;
 
+    @Mock
+    private IRestaurantOrderCommonServicePort restaurantOrderCommonServicePort;
+
     private RestaurantUseCase restaurantUseCaseUnderTest;
 
     private String TOKEN_MESSAGE = "token";
@@ -39,7 +44,7 @@ class RestaurantUseCaseTest {
     void setUp() {
         restaurantUseCaseUnderTest =
                 new RestaurantUseCase(
-                        mockRestaurantPersistancePort, mockUserValidationComunicationPort, tokenValidationPort);
+                        mockRestaurantPersistancePort, mockUserValidationComunicationPort, tokenValidationPort, restaurantOrderCommonServicePort);
     }
 
     @Test
@@ -91,13 +96,13 @@ class RestaurantUseCaseTest {
                         "1234567890",
                         "urlLogo",
                         "123456789");
-        when(mockRestaurantPersistancePort.findById(idRestaurant)).thenReturn(restaurant);
+        when(restaurantOrderCommonServicePort.findRestaurantById(idRestaurant)).thenReturn(restaurant);
         when(tokenValidationPort.findIdUserFromToken(tokenJwt)).thenReturn(4L);
 
         Boolean result = restaurantUseCaseUnderTest.isTheRestaurantOwner(tokenJwt, idRestaurant);
 
         assertFalse(result);
-        verify(mockRestaurantPersistancePort).findById(idRestaurant);
+        verify(restaurantOrderCommonServicePort).findRestaurantById(idRestaurant);
     }
 
     @Test
@@ -114,13 +119,13 @@ class RestaurantUseCaseTest {
                         "1234567890",
                         "urlLogo",
                         "123456789");
-        when(mockRestaurantPersistancePort.findById(idRestaurant)).thenReturn(restaurant);
+        when(restaurantOrderCommonServicePort.findRestaurantById(idRestaurant)).thenReturn(restaurant);
         when(tokenValidationPort.findIdUserFromToken(tokenJwt)).thenReturn(idOwner);
 
         Boolean result = restaurantUseCaseUnderTest.isTheRestaurantOwner(tokenJwt, idRestaurant);
 
         assertTrue(result);
-        verify(mockRestaurantPersistancePort).findById(idRestaurant);
+        verify(restaurantOrderCommonServicePort).findRestaurantById(idRestaurant);
     }
 
     @Test
@@ -161,19 +166,6 @@ class RestaurantUseCaseTest {
         assertFalse(result);
     }
 
-    @Test
-    void findByIdWTest_notFoundThenThrowException() {
-        Long id = 1L;
-        when(mockRestaurantPersistancePort.findById(id)).thenReturn(null);
-
-        assertThrows(
-                NoRestaurantFoundException.class,
-                () -> {
-                    restaurantUseCaseUnderTest.findById(id);
-                });
-
-        verify(mockRestaurantPersistancePort).findById(id);
-    }
 
     @Test
     void findByIdTest_success() {
@@ -187,11 +179,11 @@ class RestaurantUseCaseTest {
                         "1234567890",
                         "logo.png",
                         "123456789");
-        when(mockRestaurantPersistancePort.findById(id)).thenReturn(restaurant);
+        when(restaurantOrderCommonServicePort.findRestaurantById(id)).thenReturn(restaurant);
 
         Restaurant result = restaurantUseCaseUnderTest.findById(id);
 
-        verify(mockRestaurantPersistancePort).findById(id);
+        verify(restaurantOrderCommonServicePort).findRestaurantById(id);
         assert result != null;
         assert result.getId().equals(id);
         assert result.getName().equals("Restaurant Name");
@@ -335,7 +327,7 @@ class RestaurantUseCaseTest {
     
     @Test
     @DisplayName("Should return a list of restaurants")
-    void findAllPagedTest_successfull() {
+    void findAllPagedTest_successfully() {
         Integer page = 0;
         Integer sizePage = 10;
         List<Restaurant> expectedRestaurants = new ArrayList<>();
@@ -354,6 +346,39 @@ class RestaurantUseCaseTest {
         assertEquals(expectedRestaurants, actualRestaurants);
         verify(mockRestaurantPersistancePort, times(1))
                 .findAllPaged(page, sizePage, "name", "ASC");
+    }
+
+    @Test
+    void getDurationOfOrdersByRestaurantTest_successfully() {
+        Long idRestaurant = 1L;
+        Integer page = 0;
+        Integer sizePage = 10;
+        String token = "validToken";
+        Restaurant restaurant = new Restaurant(22L);
+        restaurant.setIdOwner(22L);
+        List<OrderDurationInfoDto> expected = List.of(new OrderDurationInfoDto());
+        when(tokenValidationPort.findIdUserFromToken(token)).thenReturn(22L);
+        when(restaurantOrderCommonServicePort.findRestaurantById(idRestaurant)).thenReturn(restaurant);
+        when(restaurantOrderCommonServicePort.getDurationOfFinalizedOrdersByRestaurant(restaurant,page,sizePage)).thenReturn(expected);
+
+        List<OrderDurationInfoDto> result = restaurantUseCaseUnderTest.getDurationOfOrdersByRestaurant(idRestaurant, page, sizePage, token);
+
+        assertEquals(expected,result);
+    }
+
+    @Test
+    void getDurationOfOrdersByRestaurantTest_isNotTheOwner() {
+        Long idRestaurant = 1L;
+        Integer page = 0;
+        Integer sizePage = 10;
+        String token = "validToken";
+        Restaurant restaurant = new Restaurant(22L);
+        restaurant.setIdOwner(22L);
+        List<OrderDurationInfoDto> expected = List.of(new OrderDurationInfoDto());
+        when(tokenValidationPort.findIdUserFromToken(token)).thenReturn(33L);
+        when(restaurantOrderCommonServicePort.findRestaurantById(idRestaurant)).thenReturn(restaurant);
+
+        assertThrows(UserHasNoPermissionException.class, () -> restaurantUseCaseUnderTest.getDurationOfOrdersByRestaurant(idRestaurant,page,sizePage,token));
     }
 
 }

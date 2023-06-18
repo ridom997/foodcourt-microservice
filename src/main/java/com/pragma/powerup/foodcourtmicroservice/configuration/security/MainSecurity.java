@@ -36,7 +36,7 @@ public class MainSecurity {
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers( "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/actuator/health").permitAll()
                         .requestMatchers(HttpMethod.POST,"/restaurants").hasRole("ADMIN")
-                        .requestMatchers("/dishes" , "/dishes/{id}", "/restaurants/{id}/validateOwner", "/dishes/{id}/status","/restaurants/{idRestaurant}/completed-orders-duration").hasRole("OWNER")
+                        .requestMatchers("/dishes" , "/dishes/{id}", "/restaurants/{id}/validateOwner", "/dishes/{id}/status","/restaurants/{idRestaurant}/completed-orders-duration", "/restaurants/{idRestaurant}/ranking-employees").hasRole("OWNER")
                         .requestMatchers(HttpMethod.GET,"/restaurants","/restaurants/{idRestaurant}/dishes", "/orders/{idOrder}/history").hasRole(CLIENT_VALUE)
                         .requestMatchers(HttpMethod.POST,"/orders").hasRole(CLIENT_VALUE)
                         .requestMatchers(HttpMethod.PATCH,"/orders/{idOrder}/cancel").hasRole(CLIENT_VALUE)

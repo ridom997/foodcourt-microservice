@@ -1,10 +1,12 @@
 package com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.handlers.impl;
 
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.request.RestaurantRequestDto;
+import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.EmployeePerformanceResponseDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.OrderDurationInfoResponseDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.RestaurantResponseDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.handlers.IRestaurantHandler;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.mapper.request.IRestaurantRequestMapper;
+import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.mapper.response.IEmployeePerformanceMapper;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.mapper.response.IOrderResponseMapper;
 import com.pragma.powerup.foodcourtmicroservice.configuration.security.jwt.JwtUtils;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IRestaurantServicePort;
@@ -21,6 +23,8 @@ public class RestaurantHandlerImpl implements IRestaurantHandler {
     private final IRestaurantServicePort restaurantServicePort;
     private final IRestaurantRequestMapper restaurantRequestMapper;
     private final IOrderResponseMapper orderResponseMapper;
+    private final IEmployeePerformanceMapper employeePerformanceMapper;
+
     @Override
     public void saveRestaurant(RestaurantRequestDto restaurantRequestDto) {
         restaurantServicePort.saveRestaurant(restaurantRequestMapper.toRestaurant(restaurantRequestDto));
@@ -43,6 +47,14 @@ public class RestaurantHandlerImpl implements IRestaurantHandler {
     public List<OrderDurationInfoResponseDto> getDurationOfOrdersByRestaurant(Long idRestaurant, Integer page, Integer sizePage) {
         return restaurantServicePort.getDurationOfOrdersByRestaurant(idRestaurant,page,sizePage,JwtUtils.getTokenFromRequestHeaders()).stream()
                 .map(orderResponseMapper::toOrderDurationInfoResponseDto)
+                .toList();
+    }
+
+    @Override
+    public List<EmployeePerformanceResponseDto> getRankingOfEmployeesByRestaurant(Long idRestaurant, Integer page, Integer sizePage) {
+        return restaurantServicePort.getRankingOfEmployeesByRestaurant(idRestaurant,page,sizePage,JwtUtils.getTokenFromRequestHeaders())
+                .stream()
+                .map(employeePerformanceMapper::toEmployeePerformanceResponseDto)
                 .toList();
     }
 }

@@ -2,6 +2,7 @@ package com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.controlle
 
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.request.NewOrderRequestDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.request.PinRequestDto;
+import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.HistoryOrderResponseDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.OrderAndStatusMessagingResponseDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.OrderResponseDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.handlers.IOrderHandler;
@@ -125,5 +126,26 @@ public class OrderController {
     public ResponseEntity<OrderResponseDto> changeOrderToCancelled(@PathVariable("idOrder") @Valid Long idOrder) {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(orderHandler.orderCancelled(idOrder));
+    }
+
+    @Operation(summary = "Get historic of order",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Order history found",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = HistoryOrderResponseDto.class))),
+                    @ApiResponse(responseCode = "400", description = "Bad request (check response message)",
+                            content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized request",
+                            content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
+                    @ApiResponse(responseCode = "403", description = "User who made the request is not the client of the given order",
+                            content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
+                    @ApiResponse(responseCode = "404", description = "Order not found or no logs found when order is not in a pending status",
+                            content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error"))),
+                    @ApiResponse(responseCode = "500", description = "Error in communication with traceability microservice",
+                            content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/Error")))
+            })
+    @GetMapping("/{idOrder}/history")
+    public ResponseEntity<HistoryOrderResponseDto> getHistoryOfOrder(@PathVariable("idOrder") @Valid Long idOrder) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(orderHandler.getHistoryOfOrder(idOrder));
     }
 }

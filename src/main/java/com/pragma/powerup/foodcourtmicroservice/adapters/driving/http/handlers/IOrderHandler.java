@@ -1,6 +1,7 @@
 package com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.handlers;
 
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.request.NewOrderRequestDto;
+import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.HistoryOrderResponseDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.OrderAndStatusMessagingResponseDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.OrderResponseDto;
 import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.response.OrderWithDetailResponseDto;
@@ -16,4 +17,6 @@ public interface IOrderHandler {
 
     OrderResponseDto orderDelivered(Long idOrder, String pin);
     OrderResponseDto orderCancelled(Long idOrder);
+
+    HistoryOrderResponseDto getHistoryOfOrder(Long idOrder);
 }

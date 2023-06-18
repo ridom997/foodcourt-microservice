@@ -1,5 +1,6 @@
 package com.pragma.powerup.foodcourtmicroservice.domain.usecase;
 
+import com.pragma.powerup.foodcourtmicroservice.domain.adapter.ExternalCommunicationDomainAdapter;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.OrderActorsDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.UserBasicInfoDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.IUserValidationComunicationPort;
@@ -20,7 +21,7 @@ import static org.mockito.Mockito.*;
 class UserValidationUseCaseTest {
 
     @Mock
-    private IUserValidationComunicationPort mockUserValidationComunicationPort;
+    private ExternalCommunicationDomainAdapter mockUserValidationComunicationPort;
 
     @InjectMocks
     private UserValidationUseCase userValidationUseCaseUnderTest;

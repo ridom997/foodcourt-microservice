@@ -1,10 +1,12 @@
 package com.pragma.powerup.foodcourtmicroservice.domain.usecase;
 
+import com.pragma.powerup.foodcourtmicroservice.domain.adapter.ExternalCommunicationDomainAdapter;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IDishServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IOrderDishServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IRestaurantServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IUserValidationServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.*;
+import com.pragma.powerup.foodcourtmicroservice.domain.dto.response.HistoryOrderDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.*;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Order;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Restaurant;
@@ -20,6 +22,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.pragma.powerup.foodcourtmicroservice.configuration.Constants.*;
@@ -42,13 +45,11 @@ class OrderUseCaseTest {
     private IOrderDishServicePort orderDishServicePort;
 
     @Mock
-    private ITraceabilityCommunicationPort traceabilityCommunicationPort;
+    private ExternalCommunicationDomainAdapter externalCommunicationDomainAdapter;
 
     @Mock
     private IUserValidationServicePort userValidationServicePort;
 
-    @Mock
-    private IMessagingCommunicationPort messagingCommunicationPort;
 
     @InjectMocks
     private OrderUseCase orderUseCase;
@@ -323,7 +324,7 @@ class OrderUseCaseTest {
         Order orderSaved = new Order();
         orderSaved.setStatus(READY_ORDER_STATUS_INT_VALUE);
         when(orderPersistencePort.saveOrderAndTraceability(any(Order.class), any(OrderLogDto.class))).thenReturn(orderSaved);
-        when(messagingCommunicationPort.sendSms(anyString(),anyString())).thenReturn(false);
+        when(externalCommunicationDomainAdapter.sendSms(anyString(),anyString())).thenReturn(false);
 
         //act
         OrderAndStatusMessagingDto result = orderUseCase.changeStatusToReady(idOrder, token);
@@ -334,7 +335,7 @@ class OrderUseCaseTest {
         verify(userValidationServicePort).existsRelationWithUserAndIdRestaurant(order.getRestaurant().getId());
         verify(userValidationServicePort).findClientAndEmployeeInfo(idClient, idEmployee);
         verify(orderPersistencePort).saveOrderAndTraceability(any(Order.class), any(OrderLogDto.class));
-        verify(messagingCommunicationPort).sendSms(anyString(), anyString());
+        verify(externalCommunicationDomainAdapter).sendSms(anyString(), anyString());
 
     }
 
@@ -367,7 +368,7 @@ class OrderUseCaseTest {
         verify(userValidationServicePort).existsRelationWithUserAndIdRestaurant(order.getRestaurant().getId());
         verify(userValidationServicePort, times(0)).findClientAndEmployeeInfo(idClient, idEmployee);
         verify(orderPersistencePort, times(0)).saveOrderAndTraceability(any(Order.class), any(OrderLogDto.class));
-        verify(messagingCommunicationPort, times(0)).sendSms(anyString(), anyString());
+        verify(externalCommunicationDomainAdapter, times(0)).sendSms(anyString(), anyString());
 
     }
 
@@ -399,7 +400,7 @@ class OrderUseCaseTest {
         verify(userValidationServicePort).existsRelationWithUserAndIdRestaurant(order.getRestaurant().getId());
         verify(userValidationServicePort, times(0)).findClientAndEmployeeInfo(idClient, idEmployee);
         verify(orderPersistencePort, times(0)).saveOrderAndTraceability(any(Order.class), any(OrderLogDto.class));
-        verify(messagingCommunicationPort, times(0)).sendSms(anyString(), anyString());
+        verify(externalCommunicationDomainAdapter, times(0)).sendSms(anyString(), anyString());
     }
 
 
@@ -577,4 +578,88 @@ class OrderUseCaseTest {
         verify(tokenValidationPort).findIdUserFromToken(token);
         verify(orderPersistencePort).findById(idOrder);
     }
+
+    @Test
+    void getHistoryOfOrderTest_successfullyWhenOrderIsPendingStatus(){
+        Long idOrder = 1L;
+        String token = "validToken";
+        Long idClient = 1L;
+
+        Order order = new Order();
+        order.setId(idOrder);
+        order.setStatus(PENDING_ORDER_STATUS_INT_VALUE);
+        order.setIdClient(idClient);
+        order.setDate(LocalDateTime.now());
+        order.setIdChef(0L);
+        when(orderPersistencePort.findById(idOrder)).thenReturn(order);
+        when(tokenValidationPort.findIdUserFromToken(token)).thenReturn(idClient);
+        HistoryOrderDto historyOrderDtoExpected = new HistoryOrderDto(
+                order.getId(),
+                null,
+                order.getDate(),
+                order.getDateFinished(),
+                order.getIdChef(),
+                order.getStatus());
+
+        HistoryOrderDto result = orderUseCase.getHistoryOfOrder(idOrder, token);
+
+        assertEquals(historyOrderDtoExpected.getIdOrder(), result.getIdOrder());
+        assertEquals(historyOrderDtoExpected.getStatusChanges(), result.getStatusChanges());
+        assertEquals(historyOrderDtoExpected.getCreationTime(), result.getCreationTime());
+        assertEquals(historyOrderDtoExpected.getEndTime(), result.getEndTime());
+        assertEquals(historyOrderDtoExpected.getIdChef(), result.getIdChef());
+        assertEquals(historyOrderDtoExpected.getActualStatus(), result.getActualStatus());
+    }
+
+    @Test
+    void getHistoryOfOrderTest_userHasNoPermissionException(){
+        Long idOrder = 1L;
+        String token = "validToken";
+        Long idClient = 1L;
+
+        Order order = new Order();
+        order.setId(idOrder);
+        order.setStatus(PENDING_ORDER_STATUS_INT_VALUE);
+        order.setIdClient(2L);
+        order.setDate(LocalDateTime.now());
+        order.setIdChef(0L);
+        when(tokenValidationPort.findIdUserFromToken(token)).thenReturn(idClient);
+        when(orderPersistencePort.findById(idOrder)).thenReturn(order);
+
+        assertThrows(UserHasNoPermissionException.class, () -> orderUseCase.getHistoryOfOrder(idOrder,token));
+    }
+
+    @Test
+    void getHistoryOfOrderTest_successfullyWhenOrderIsNotPendingStatus(){
+        Long idOrder = 1L;
+        String token = "validToken";
+        Long idClient = 1L;
+
+        Order order = new Order();
+        order.setId(idOrder);
+        order.setStatus(IN_PROGRESS_ORDER_STATUS_INT_VALUE);
+        order.setIdClient(idClient);
+        order.setDate(LocalDateTime.now());
+        order.setIdChef(0L);
+        when(orderPersistencePort.findById(idOrder)).thenReturn(order);
+        when(tokenValidationPort.findIdUserFromToken(token)).thenReturn(idClient);
+        when(externalCommunicationDomainAdapter.getTraceabilityListOfOrder(idOrder)).thenReturn(null);
+        HistoryOrderDto historyOrderDtoExpected = new HistoryOrderDto(
+                order.getId(),
+                null,
+                order.getDate(),
+                order.getDateFinished(),
+                order.getIdChef(),
+                order.getStatus());
+
+        HistoryOrderDto result = orderUseCase.getHistoryOfOrder(idOrder, token);
+
+        assertEquals(historyOrderDtoExpected.getIdOrder(), result.getIdOrder());
+        assertEquals(historyOrderDtoExpected.getStatusChanges(), result.getStatusChanges());
+        assertEquals(historyOrderDtoExpected.getCreationTime(), result.getCreationTime());
+        assertEquals(historyOrderDtoExpected.getEndTime(), result.getEndTime());
+        assertEquals(historyOrderDtoExpected.getIdChef(), result.getIdChef());
+        assertEquals(historyOrderDtoExpected.getActualStatus(), result.getActualStatus());
+    }
+
 }

@@ -131,6 +131,12 @@ To get a local copy up and running follow these steps.
 + Se hizo el endpoint "/orders/{idOrder}/history" el cual es necesario estar autenticado como cliente que hizo el pedido (order)
 + Para que este endpoint funcione correctamente es necesario tener activo el microservicio traceability.
 + En caso de que el pedido (order) esté en estado 1 (PENDING) no se trae lista de cambios de estado, debido a que este es el estado inicial.
+### HU18:
++ Para el primer criterio de aceptación se hizo un endpoint "/restaurants/{idRestaurant}/completed-orders-duration" el cual es necesario estar autenticado como el propietario del restaurante.
+  + Devuelve lista pagina de los pedidos que están cerrados en el restaurante (estados "CANCELLED" o "DELIVERED").
++ Para el segundo criterio de aceptación se hizo un endpoint "/restaurants/{idRestaurant}/ranking-employees" el cual es necesario estar autenticado como el propietario del restaurante.
+  + Este endpoint devuelve una lista paginada con los empleados de dicho restaurante que tenga asociado almenos un pedido (order) en estado "DELIVERED", 
+  + La lista viene ordenada ascendentemente por el tiempoPromedio (promedio bajo = mejor rendimiento).
 <!-- ROADMAP -->
 ## Tests
 

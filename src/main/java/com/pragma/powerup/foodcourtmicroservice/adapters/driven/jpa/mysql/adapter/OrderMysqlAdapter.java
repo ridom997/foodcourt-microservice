@@ -5,14 +5,18 @@ import com.pragma.powerup.foodcourtmicroservice.adapters.driven.jpa.mysql.mapper
 import com.pragma.powerup.foodcourtmicroservice.adapters.driven.jpa.mysql.repositories.IOrderEntityRepository;
 import com.pragma.powerup.foodcourtmicroservice.domain.adapter.ExternalCommunicationDomainAdapter;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.OrderLogDto;
+import com.pragma.powerup.foodcourtmicroservice.domain.dto.response.EmployeePerformanceDto;
+import com.pragma.powerup.foodcourtmicroservice.domain.dto.response.OrderDurationInfoDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Order;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.IOrderPersistencePort;
+import jakarta.persistence.Tuple;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -58,5 +62,31 @@ public class OrderMysqlAdapter implements IOrderPersistencePort {
         return ordersByIdRestaurantAndStatus.stream()
                 .map(orderEntityMapper::mapToOrder)
                 .toList();
+    }
+
+    @Override
+    public List<OrderDurationInfoDto> findAllPagedCompletedOrdersByIdRestaurant(Long idRestaurant, Integer page, Integer sizePage) {
+        Pageable pageable = PageRequest.of(page, sizePage);
+        Page<OrderEntity> completedOrdersByIdRestaurant = orderEntityRepository.getCompletedOrdersByIdRestaurant(idRestaurant, pageable);
+        return completedOrdersByIdRestaurant.stream()
+                .map(order -> new OrderDurationInfoDto(order.getId(),order.getDate(),order.getDateFinished(),order.getStatus()))
+                .toList();
+    }
+
+    @Override
+    public List<EmployeePerformanceDto> getRankingOfEmployeesByRestaurant(Long idRestaurant, Integer page, Integer sizePage) {
+        Pageable pageable = PageRequest.of(page, sizePage);
+        List<Tuple> rankingOfEmployeesByRestaurant = orderEntityRepository.getRankingOfEmployeesByRestaurant(idRestaurant, pageable);
+        List<EmployeePerformanceDto> employeeRanking = new ArrayList<>();
+        rankingOfEmployeesByRestaurant.stream()
+                .forEach(employeeInfo -> {
+                    double averageTimeDouble = employeeInfo.get("averageTime", Double.class);
+                    averageTimeDouble = averageTimeDouble / 1E9;
+                    int averageTimeInt = (int) Math.round(averageTimeDouble);
+                    Long idEmployee = employeeInfo.get("idEmployee", Long.class);
+                    Long numberOfOrders = (Long) employeeInfo.get("numberOfOrders");
+                    employeeRanking.add(new EmployeePerformanceDto(idEmployee, averageTimeInt, numberOfOrders));
+                });
+        return employeeRanking;
     }
 }

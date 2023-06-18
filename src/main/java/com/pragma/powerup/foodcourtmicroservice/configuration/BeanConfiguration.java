@@ -19,7 +19,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @RequiredArgsConstructor
 public class BeanConfiguration {
-
     private final IRestaurantEntityRepository restaurantEntityRepository;
     private final IRestaurantEntityMapper restaurantEntityMapper;
 
@@ -46,12 +45,6 @@ public class BeanConfiguration {
     public IRestaurantPersistencePort restaurantPersistancePort(){
         return new RestaurantMysqlAdapter(restaurantEntityRepository,restaurantEntityMapper);
     }
-
-    @Bean
-    public IRestaurantServicePort restaurantServicePort(){
-        return new RestaurantUseCase(restaurantPersistancePort(), externalCommunicationDomainAdapter(), tokenValidationPort());
-    }
-
     @Bean
     public IDishPersistencePort dishPersistancePort(){
         return new DishMysqlAdapter(dishEntityRepository,iDishEntityMapper);
@@ -92,21 +85,36 @@ public class BeanConfiguration {
 
     @Bean
     public IUserValidationServicePort userValidationServicePort(){
+
         return new UserValidationUseCase(externalCommunicationDomainAdapter());
     }
-
     @Bean
     public ExternalCommunicationDomainAdapter externalCommunicationDomainAdapter(){
         return new ExternalCommunicationDomainAdapter(messagingCommunicationPort,traceabilityCommunicationPort,userValidationServicePort);
     }
+
+    @Bean
+    public IRestaurantOrderCommonServicePort restaurantOrderCommonServicePort(){
+        return new RestaurantOrderCommonUseCase(restaurantPersistancePort(),orderPersistencePort());
+    }
+
     @Bean
     public IOrderServicePort orderServicePort() {
         return new OrderUseCase(orderPersistencePort(),
                 tokenValidationPort(),
                 dishServicePort(),
-                restaurantServicePort(),
+                restaurantOrderCommonServicePort(),
                 orderDishServicePort(),
                 externalCommunicationDomainAdapter(),
                 userValidationServicePort());
     }
+
+    @Bean
+    public IRestaurantServicePort restaurantServicePort() {
+        return new RestaurantUseCase(restaurantPersistancePort(),
+                externalCommunicationDomainAdapter(),
+                tokenValidationPort(),
+                restaurantOrderCommonServicePort());
+    }
+
 }

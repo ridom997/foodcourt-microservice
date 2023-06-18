@@ -4,6 +4,7 @@ import com.pragma.powerup.foodcourtmicroservice.adapters.driving.http.dto.respon
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.OrderAndStatusMessagingDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.OrderWithDetailDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.response.HistoryOrderDto;
+import com.pragma.powerup.foodcourtmicroservice.domain.dto.response.OrderDurationInfoDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.response.TraceabilityOrderDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Order;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.OrderDish;
@@ -55,4 +56,7 @@ public interface IOrderResponseMapper {
 
     @Mapping(source = "historyOrderDto.actualStatus", target = "actualStatus", qualifiedByName = "mapStatusIntToString")
     HistoryOrderResponseDto mapToHistoryOrderResponseDto(HistoryOrderDto historyOrderDto);
+
+    @Mapping(source = "orderDurationInfoDto.finalStatus", target = "finalStatus", qualifiedByName = "mapStatusIntToString")
+    OrderDurationInfoResponseDto toOrderDurationInfoResponseDto(OrderDurationInfoDto orderDurationInfoDto);
 }

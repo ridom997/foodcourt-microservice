@@ -4,6 +4,7 @@ import com.pragma.powerup.foodcourtmicroservice.configuration.Constants;
 import com.pragma.powerup.foodcourtmicroservice.domain.adapter.ExternalCommunicationDomainAdapter;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IRestaurantOrderCommonServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IRestaurantServicePort;
+import com.pragma.powerup.foodcourtmicroservice.domain.dto.response.EmployeePerformanceDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.response.OrderDurationInfoDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.*;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Restaurant;
@@ -85,12 +86,22 @@ public class RestaurantUseCase implements IRestaurantServicePort {
     @Override
     public List<OrderDurationInfoDto> getDurationOfOrdersByRestaurant(Long idRestaurant, Integer page, Integer sizePage, String token) {
         PaginationValidations.validatePageAndSizePage(page,sizePage);
+        Restaurant restaurant = getRestaurantAfterValidateOwner(idRestaurant, token);
+        return restaurantOrderCommonServicePort.getDurationOfFinalizedOrdersByRestaurant(restaurant, page, sizePage);
+    }
+
+    @Override
+    public List<EmployeePerformanceDto> getRankingOfEmployeesByRestaurant(Long idRestaurant, Integer page, Integer sizePage, String token) {
+        PaginationValidations.validatePageAndSizePage(page,sizePage);
+        Restaurant restaurant = getRestaurantAfterValidateOwner(idRestaurant, token);
+        return restaurantOrderCommonServicePort.getRankingOfEmployeesByRestaurant(restaurant.getId(),page,sizePage);
+    }
+
+    private Restaurant getRestaurantAfterValidateOwner(Long idRestaurant, String token){
         Restaurant restaurant = findById(idRestaurant);
         if(Boolean.FALSE.equals(isTheRestaurantOwner(token, restaurant))){
             throw new UserHasNoPermissionException(USER_IS_NOT_THE_RESTAURANT_OWNER_MESSAGE);
         }
-        return restaurantOrderCommonServicePort.getDurationOfFinalizedOrdersByRestaurant(restaurant, page, sizePage);
+        return restaurant;
     }
-
-
 }

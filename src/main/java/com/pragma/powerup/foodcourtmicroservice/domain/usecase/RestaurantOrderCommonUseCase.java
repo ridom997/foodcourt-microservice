@@ -1,6 +1,7 @@
 package com.pragma.powerup.foodcourtmicroservice.domain.usecase;
 
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IRestaurantOrderCommonServicePort;
+import com.pragma.powerup.foodcourtmicroservice.domain.dto.response.EmployeePerformanceDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.response.OrderDurationInfoDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.NoDataFoundException;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.NoRestaurantFoundException;
@@ -40,5 +41,13 @@ public class RestaurantOrderCommonUseCase implements IRestaurantOrderCommonServi
         if (allPagedCompletedOrdersByIdRestaurant.isEmpty())
             throw new NoDataFoundException(NO_ORDERS_FOUND_MESSAGE);
         return allPagedCompletedOrdersByIdRestaurant;
+    }
+
+    @Override
+    public List<EmployeePerformanceDto> getRankingOfEmployeesByRestaurant(Long idRestaurant, Integer page, Integer sizePage) {
+        List<EmployeePerformanceDto> rankingOfEmployeesByRestaurant = orderPersistencePort.getRankingOfEmployeesByRestaurant(idRestaurant, page, sizePage);
+        if (rankingOfEmployeesByRestaurant.isEmpty())
+            throw new NoDataFoundException("No data found");
+        return rankingOfEmployeesByRestaurant;
     }
 }

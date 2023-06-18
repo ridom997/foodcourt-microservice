@@ -1,6 +1,7 @@
 package com.pragma.powerup.foodcourtmicroservice.domain.spi;
 
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.OrderLogDto;
+import com.pragma.powerup.foodcourtmicroservice.domain.dto.response.EmployeePerformanceDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.response.OrderDurationInfoDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Order;
 
@@ -14,4 +15,6 @@ public interface IOrderPersistencePort {
     List<Order> getOrdersByRestaurantAndStatus(Integer page, Integer sizePage, Long idRestaurant, Integer status);
 
     List<OrderDurationInfoDto> findAllPagedCompletedOrdersByIdRestaurant(Long idRestaurant, Integer page, Integer sizePage);
+    List<EmployeePerformanceDto> getRankingOfEmployeesByRestaurant(Long idRestaurant, Integer page, Integer sizePage);
+
 }

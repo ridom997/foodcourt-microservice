@@ -1,5 +1,6 @@
 package com.pragma.powerup.foodcourtmicroservice.domain.usecase;
 
+import com.pragma.powerup.foodcourtmicroservice.domain.dto.response.EmployeePerformanceDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.response.OrderDurationInfoDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.NoDataFoundException;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.NoRestaurantFoundException;
@@ -83,6 +84,33 @@ class RestaurantOrderCommonUseCaseTest {
                 .thenReturn(Collections.emptyList());
 
         assertThrows(NoDataFoundException.class, () -> restaurantOrderCommonUseCaseUnderTest.getDurationOfFinalizedOrdersByRestaurant(restaurant, 0,
+                0));
+    }
+
+    @Test
+    void testGetRankingOfEmployeesByRestaurant_successfully() {
+        // Setup
+        Long idRestaurant = 3L;
+        final List<EmployeePerformanceDto> orderDurationInfoDtos = List.of(new EmployeePerformanceDto(), new EmployeePerformanceDto());
+        when(mockOrderPersistencePort.getRankingOfEmployeesByRestaurant(idRestaurant, 0, 0))
+                .thenReturn(orderDurationInfoDtos);
+
+        // Run the test
+        List<EmployeePerformanceDto> result = restaurantOrderCommonUseCaseUnderTest.getRankingOfEmployeesByRestaurant(
+                idRestaurant, 0, 0);
+
+        assertEquals(2,result.size());
+        verify(mockOrderPersistencePort,times(1)).getRankingOfEmployeesByRestaurant(idRestaurant, 0, 0);
+    }
+
+    @Test
+    void testGetRankingOfEmployeesByRestaurant_IOrderPersistencePortReturnsNoItems() {
+        // Setup
+        Long idRestaurant = 3L;
+        when(mockOrderPersistencePort.getRankingOfEmployeesByRestaurant(idRestaurant, 0, 0))
+                .thenReturn(Collections.emptyList());
+
+        assertThrows(NoDataFoundException.class, () -> restaurantOrderCommonUseCaseUnderTest.getRankingOfEmployeesByRestaurant(idRestaurant, 0,
                 0));
     }
 }

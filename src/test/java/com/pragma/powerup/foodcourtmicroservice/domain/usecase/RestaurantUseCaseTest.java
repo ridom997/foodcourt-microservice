@@ -4,6 +4,7 @@ import com.pragma.powerup.foodcourtmicroservice.configuration.Constants;
 import com.pragma.powerup.foodcourtmicroservice.domain.adapter.ExternalCommunicationDomainAdapter;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IOrderServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IRestaurantOrderCommonServicePort;
+import com.pragma.powerup.foodcourtmicroservice.domain.dto.response.EmployeePerformanceDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.response.OrderDurationInfoDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.*;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Restaurant;
@@ -379,6 +380,43 @@ class RestaurantUseCaseTest {
         when(restaurantOrderCommonServicePort.findRestaurantById(idRestaurant)).thenReturn(restaurant);
 
         assertThrows(UserHasNoPermissionException.class, () -> restaurantUseCaseUnderTest.getDurationOfOrdersByRestaurant(idRestaurant,page,sizePage,token));
+    }
+
+    @Test
+    void getRankingOfEmployeesByRestaurant_successfully() {
+        Long idRestaurant = 22L;
+        Integer page = 0;
+        Integer sizePage = 10;
+        String token = "validToken";
+        Restaurant restaurant = new Restaurant(idRestaurant);
+        restaurant.setIdOwner(11L);
+        List<EmployeePerformanceDto> expected = List.of(new EmployeePerformanceDto());
+        when(tokenValidationPort.findIdUserFromToken(token)).thenReturn(11L);
+        when(restaurantOrderCommonServicePort.findRestaurantById(idRestaurant)).thenReturn(restaurant);
+        when(restaurantOrderCommonServicePort.getRankingOfEmployeesByRestaurant(restaurant.getId(),page,sizePage)).thenReturn(expected);
+
+        List<EmployeePerformanceDto> result = restaurantUseCaseUnderTest.getRankingOfEmployeesByRestaurant(idRestaurant, page, sizePage, token);
+
+        assertEquals(expected,result);
+        verify(restaurantOrderCommonServicePort).findRestaurantById(idRestaurant);
+        verify(restaurantOrderCommonServicePort).getRankingOfEmployeesByRestaurant(idRestaurant, page, sizePage);
+    }
+
+    @Test
+    void getRankingOfEmployeesByRestaurant_isNotTheOwner() {
+        Long idRestaurant = 1L;
+        Integer page = 0;
+        Integer sizePage = 10;
+        String token = "validToken";
+        Restaurant restaurant = new Restaurant(22L);
+        restaurant.setIdOwner(22L);
+        List<OrderDurationInfoDto> expected = List.of(new OrderDurationInfoDto());
+        when(tokenValidationPort.findIdUserFromToken(token)).thenReturn(33L);
+        when(restaurantOrderCommonServicePort.findRestaurantById(idRestaurant)).thenReturn(restaurant);
+
+        assertThrows(UserHasNoPermissionException.class, () -> restaurantUseCaseUnderTest.getRankingOfEmployeesByRestaurant(idRestaurant,page,sizePage,token));
+
+        verify(restaurantOrderCommonServicePort).findRestaurantById(idRestaurant);
     }
 
 }

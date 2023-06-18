@@ -1,6 +1,5 @@
 package com.pragma.powerup.foodcourtmicroservice.domain.usecase;
 
-import com.pragma.powerup.foodcourtmicroservice.configuration.Constants;
 import com.pragma.powerup.foodcourtmicroservice.domain.adapter.ExternalCommunicationDomainAdapter;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IRestaurantOrderCommonServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.api.IRestaurantServicePort;
@@ -15,7 +14,7 @@ import com.pragma.powerup.foodcourtmicroservice.domain.validations.PaginationVal
 
 import java.util.List;
 
-import static com.pragma.powerup.foodcourtmicroservice.configuration.Constants.*;
+import static com.pragma.powerup.foodcourtmicroservice.domain.constants.DomainConstants.*;
 
 public class RestaurantUseCase implements IRestaurantServicePort {
     private final IRestaurantPersistencePort restaurantPersistancePort;
@@ -33,13 +32,13 @@ public class RestaurantUseCase implements IRestaurantServicePort {
 
     @Override
     public void saveRestaurant(Restaurant restaurant) {
-            if (!restaurant.getName().matches(Constants.ALPHANUMERIC_BUT_NOT_ONLY_NUMBERS_REGEX))
+            if (!restaurant.getName().matches(ALPHANUMERIC_BUT_NOT_ONLY_NUMBERS_REGEX))
                 throw new NotValidNameRestaurantException();
-            if (!restaurant.getPhone().matches(Constants.PHONE_REGEX))
+            if (!restaurant.getPhone().matches(PHONE_REGEX))
                 throw new InvalidPhoneException();
-            if (!restaurant.getNit().matches(Constants.ONLY_NUMBERS_REGEX))
+            if (!restaurant.getNit().matches(ONLY_NUMBERS_REGEX))
                 throw new NotOnlyNumbersException();
-            Boolean userHasRole = externalCommunicationDomainAdapter.userHasRole(restaurant.getIdOwner(), Constants.OWNER_ROLE_ID);
+            Boolean userHasRole = externalCommunicationDomainAdapter.userHasRole(restaurant.getIdOwner(), OWNER_ROLE_ID);
             if(userHasRole.equals(false))
                 throw new UserHasNoPermissionException("The user provided in the request is not an owner");
             restaurantPersistancePort.saveRestaurant(restaurant);

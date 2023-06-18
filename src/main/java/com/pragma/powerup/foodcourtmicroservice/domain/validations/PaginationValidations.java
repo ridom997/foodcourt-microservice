@@ -2,8 +2,9 @@ package com.pragma.powerup.foodcourtmicroservice.domain.validations;
 
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.FailValidatingRequiredVariableException;
 
-import static com.pragma.powerup.foodcourtmicroservice.configuration.Constants.PAGE_NOT_VALID_MESSAGE;
-import static com.pragma.powerup.foodcourtmicroservice.configuration.Constants.SIZE_PAGE_NOT_VALID_MESSAGE;
+import static com.pragma.powerup.foodcourtmicroservice.domain.constants.DomainConstants.PAGE_NOT_VALID_MESSAGE;
+import static com.pragma.powerup.foodcourtmicroservice.domain.constants.DomainConstants.SIZE_PAGE_NOT_VALID_MESSAGE;
+
 
 public class PaginationValidations {
 

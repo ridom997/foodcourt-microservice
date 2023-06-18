@@ -12,8 +12,8 @@ import com.pragma.powerup.foodcourtmicroservice.domain.validations.ArgumentValid
 
 import java.util.List;
 
-import static com.pragma.powerup.foodcourtmicroservice.configuration.Constants.ID_RESTAURANT_STRING_VALUE;
-import static com.pragma.powerup.foodcourtmicroservice.domain.constants.MessageConstants.NO_ORDERS_FOUND_MESSAGE;
+import static com.pragma.powerup.foodcourtmicroservice.domain.constants.DomainConstants.ID_RESTAURANT_STRING_VALUE;
+import static com.pragma.powerup.foodcourtmicroservice.domain.constants.DomainConstants.NO_ORDERS_FOUND_MESSAGE;
 
 public class RestaurantOrderCommonUseCase implements IRestaurantOrderCommonServicePort {
 

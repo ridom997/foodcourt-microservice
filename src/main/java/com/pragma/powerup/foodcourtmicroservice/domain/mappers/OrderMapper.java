@@ -8,7 +8,7 @@ import com.pragma.powerup.foodcourtmicroservice.domain.model.Restaurant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
-import static com.pragma.powerup.foodcourtmicroservice.configuration.Constants.PENDING_ORDER_STATUS_INT_VALUE;
+import static com.pragma.powerup.foodcourtmicroservice.domain.constants.DomainConstants.PENDING_ORDER_STATUS_INT_VALUE;
 
 public class OrderMapper {
 

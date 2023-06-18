@@ -22,8 +22,7 @@ import com.pragma.powerup.foodcourtmicroservice.domain.validations.PaginationVal
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static com.pragma.powerup.foodcourtmicroservice.configuration.Constants.*;
-import static com.pragma.powerup.foodcourtmicroservice.domain.constants.MessageConstants.*;
+import static com.pragma.powerup.foodcourtmicroservice.domain.constants.DomainConstants.*;
 
 public class OrderUseCase implements IOrderServicePort {
 

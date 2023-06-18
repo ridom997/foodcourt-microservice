@@ -2,8 +2,8 @@ package com.pragma.powerup.foodcourtmicroservice.domain.utils;
 
 import java.util.UUID;
 
-import static com.pragma.powerup.foodcourtmicroservice.configuration.Constants.*;
-import static com.pragma.powerup.foodcourtmicroservice.configuration.Constants.DELIVERED_ORDER_STATUS_VALUE;
+import static com.pragma.powerup.foodcourtmicroservice.domain.constants.DomainConstants.*;
+
 
 public class OrderUtils {
 

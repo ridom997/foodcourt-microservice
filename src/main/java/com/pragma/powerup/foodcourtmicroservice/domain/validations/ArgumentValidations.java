@@ -2,7 +2,7 @@ package com.pragma.powerup.foodcourtmicroservice.domain.validations;
 
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.FailValidatingRequiredVariableException;
 
-import static com.pragma.powerup.foodcourtmicroservice.configuration.Constants.NOT_PRESENT_MESSAGE;
+import static com.pragma.powerup.foodcourtmicroservice.domain.constants.DomainConstants.NOT_PRESENT_MESSAGE;
 
 public class ArgumentValidations {
 

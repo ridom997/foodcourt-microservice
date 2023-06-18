@@ -1,17 +1,18 @@
 package com.pragma.powerup.foodcourtmicroservice.domain.usecase;
 
 import com.pragma.powerup.foodcourtmicroservice.domain.adapter.ExternalCommunicationDomainAdapter;
-import com.pragma.powerup.foodcourtmicroservice.domain.api.*;
+import com.pragma.powerup.foodcourtmicroservice.domain.api.IDishServicePort;
+import com.pragma.powerup.foodcourtmicroservice.domain.api.IOrderDishServicePort;
+import com.pragma.powerup.foodcourtmicroservice.domain.api.IRestaurantOrderCommonServicePort;
+import com.pragma.powerup.foodcourtmicroservice.domain.api.IUserValidationServicePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.*;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.response.HistoryOrderDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.dto.response.OrderDurationInfoDto;
 import com.pragma.powerup.foodcourtmicroservice.domain.exceptions.*;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Order;
 import com.pragma.powerup.foodcourtmicroservice.domain.model.Restaurant;
-import com.pragma.powerup.foodcourtmicroservice.domain.spi.IMessagingCommunicationPort;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.IOrderPersistencePort;
 import com.pragma.powerup.foodcourtmicroservice.domain.spi.ITokenValidationPort;
-import com.pragma.powerup.foodcourtmicroservice.domain.spi.ITraceabilityCommunicationPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.pragma.powerup.foodcourtmicroservice.configuration.Constants.*;
-import static com.pragma.powerup.foodcourtmicroservice.domain.constants.MessageConstants.NO_ORDERS_FOUND_MESSAGE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
